@@ -9,7 +9,7 @@ import type { DataTableColumn, DataTableContextProps } from './dataTableTypes';
 import { DataTableProps, DataTableVariant } from './dataTableTypes';
 import ItemMarkings from '../ItemMarkings';
 import ItemStatus from '../ItemStatus';
-import { emptyFilled, truncate } from '../../utils/String';
+import { emptyFilled } from '../../utils/String';
 import ItemPriority from '../ItemPriority';
 import { isNotEmptyField } from '../../utils/utils';
 import RatingField from '../fields/RatingField';
@@ -23,26 +23,12 @@ import ItemBoolean from '../ItemBoolean';
 import ItemSeverity from '../ItemSeverity';
 import { APP_BASE_PATH } from '../../relay/environment';
 
-const MAGICAL_SIZE = 0.113;
-
 const chipStyle = {
   fontSize: '12px',
   lineHeight: '12px',
   height: '20px',
   marginRight: '7px',
   borderRadius: '10px',
-};
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type TextInTooltip = (val?: string, helpers?: any) => ReactNode;
-export const textInTooltip: TextInTooltip = (val, helpers) => {
-  const value = val ?? '-';
-  const { column: { size } } = helpers;
-  return (
-    <Tooltip title={value}>
-      <div>{truncate(value, size * MAGICAL_SIZE, false)}</div>
-    </Tooltip>
-  );
 };
 
 // TODO improve this with a proper context definition
@@ -98,9 +84,17 @@ const useStyles = makeStyles<Theme>((theme) => ({
   },
 }));
 
-const defaultRender: DataTableColumn['render'] = (data, { column: { size } }) => (<Tooltip title={data}>
-  <div>{truncate(data, size * MAGICAL_SIZE)}</div>
-</Tooltip>);
+const Truncate = ({ children }: { children: ReactNode }) => (
+  <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+    {children}
+  </div>
+);
+
+export const defaultRender: NonNullable<DataTableColumn['render']> = (data) => (
+  <Tooltip title={data}>
+    <Truncate>{data}</Truncate>
+  </Tooltip>
+);
 
 const defaultColumns: DataTableProps['dataColumns'] = {
   allowed_markings: {
@@ -182,7 +176,7 @@ const defaultColumns: DataTableProps['dataColumns'] = {
     label: 'Color',
     percentWidth: 25,
     isSortable: true,
-    render: ({ color }, { column: { size } }) => (
+    render: ({ color }) => (
       <Tooltip title={color}>
         <>
           <div
@@ -195,7 +189,7 @@ const defaultColumns: DataTableProps['dataColumns'] = {
               marginRight: 5,
             }}
           />
-          {truncate(color, size * MAGICAL_SIZE)}
+          <Truncate>{color}</Truncate>
         </>
       </Tooltip>
     ),
@@ -549,7 +543,7 @@ const defaultColumns: DataTableProps['dataColumns'] = {
     label: 'Owner',
     percentWidth: 12,
     isSortable: true,
-    render: ({ owner }, h) => textInTooltip(owner.name, h),
+    render: ({ owner }, h) => defaultRender(owner.name, h),
   },
   pattern_type: {
     id: 'pattern_type',
@@ -910,12 +904,15 @@ const defaultColumns: DataTableProps['dataColumns'] = {
     label: 'File name',
     percentWidth: 12,
     isSortable: false,
-    render: (data, { column: { size } }) => {
+    render: (data) => {
       const file = (data.importFiles?.edges && data.importFiles.edges.length > 0)
         ? data.importFiles.edges[0]?.node
         : { name: 'N/A', metaData: { mimetype: 'N/A' }, size: 0 };
-      return (<Tooltip title={file?.name}><>{truncate(file?.name, size * MAGICAL_SIZE)}</>
-      </Tooltip>);
+      return (
+        <Tooltip title={file?.name}>
+          <Truncate>{file.name}</Truncate>
+        </Tooltip>
+      );
     },
   },
   file_mime_type: {
@@ -923,12 +920,15 @@ const defaultColumns: DataTableProps['dataColumns'] = {
     label: 'Mime/Type',
     percentWidth: 8,
     isSortable: false,
-    render: (data, { column: { size } }) => {
+    render: (data) => {
       const file = (data.importFiles?.edges && data.importFiles.edges.length > 0)
         ? data.importFiles.edges[0]?.node
         : { name: 'N/A', metaData: { mimetype: 'N/A' }, size: 0 };
-      return (<Tooltip title={file?.metaData?.mimetype}><>{truncate(file?.metaData?.mimetype, size * MAGICAL_SIZE)}</>
-      </Tooltip>);
+      return (
+        <Tooltip title={file?.metaData?.mimetype}>
+          <Truncate>{file.metaData.mimetype}</Truncate>
+        </Tooltip>
+      );
     },
   },
   file_size: {

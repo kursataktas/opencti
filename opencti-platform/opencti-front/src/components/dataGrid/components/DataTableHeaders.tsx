@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { CSSProperties, FunctionComponent, useMemo, useState } from 'react';
 import Checkbox from '@mui/material/Checkbox';
 import { DragIndicatorOutlined } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { PopoverProps } from '@mui/material/Popover/Popover';
 import { useTheme } from '@mui/styles';
 import { DataTableColumn, DataTableColumns, DataTableHeadersProps, LocalStorageColumns } from '../dataTableTypes';
-import DataTableHeader from './DataTableHeader';
+import DataTableHeader, { SELECT_COLUMN_SIZE } from './DataTableHeader';
 import { useDataTableContext } from '../dataTableUtils';
 import type { Theme } from '../../Theme';
 
@@ -38,10 +38,9 @@ const DataTableHeaders: FunctionComponent<DataTableHeadersProps> = ({
     selectAll,
     numberOfSelectedElements,
     handleToggleSelectAll,
-    selectedElements,
   } = useDataTableToggle(storageKey);
 
-  const [_, setLocalStorageColumns] = useDataTableLocalStorage<LocalStorageColumns>(`${storageKey}_columns`, {}, true, true);
+  const [, setLocalStorageColumns] = useDataTableLocalStorage<LocalStorageColumns>(`${storageKey}_columns`, {}, true, true);
 
   const [activeColumn, setActiveColumn] = useState<DataTableColumn | undefined>();
   const [anchorEl, setAnchorEl] = useState<PopoverProps['anchorEl']>(null);
@@ -61,27 +60,20 @@ const DataTableHeaders: FunctionComponent<DataTableHeadersProps> = ({
     setColumns(newColumns);
   };
 
-  const ordonableColumns = useMemo(() => effectiveColumns.filter(({ id }) => !['select', 'navigate'].includes(id)), [columns]);
+  const draggableColumns = useMemo(() => effectiveColumns.filter(({ id }) => !['select', 'navigate'].includes(id)), [columns]);
+
+  const hasSelectCheckboxes = effectiveColumns.some(({ id }) => id === 'select');
+  const hasSelectedElements = numberOfSelectedElements > 0 || selectAll;
+
+  const checkboxStyle: CSSProperties = {
+    background: hasSelectedElements ? theme.palette.background.accent : 'unset',
+    width: SELECT_COLUMN_SIZE,
+  };
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        width: 'calc(var(--header-table-size) * 1px)',
-        height: theme.spacing(6),
-        alignItems: 'stretch',
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        background: (Object.keys(selectedElements ?? {}).length > 0 || selectAll) && !disableSelectAll ? theme.palette.background.accent : 'unset',
-      }}
-    >
-      {effectiveColumns.some(({ id }) => id === 'select') && (
-        <div
-          data-testid="dataTableCheckAll"
-          style={{
-            display: 'flex',
-            alignSelf: 'center',
-            width: 'calc(var(--header-select-size) * 1px)',
-          }}
-        >
+    <div style={{ display: 'flex' }}>
+      {hasSelectCheckboxes && (
+        <div data-testid="dataTableCheckAll" style={checkboxStyle}>
           <Checkbox
             checked={selectAll}
             onChange={handleToggleSelectAll}
@@ -97,7 +89,7 @@ const DataTableHeaders: FunctionComponent<DataTableHeadersProps> = ({
                 <DragDropContext
                   key={(new Date()).toString()}
                   onDragEnd={({ draggableId, source, destination }) => {
-                    const result = Array.from(ordonableColumns);
+                    const result = Array.from(draggableColumns);
                     const [removed] = result.splice(source.index, 1);
                     result.splice((destination as DraggableLocation).index, 0, removed);
 
@@ -117,7 +109,7 @@ const DataTableHeaders: FunctionComponent<DataTableHeadersProps> = ({
                   <Droppable droppableId="droppable-list">
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps}>
-                        {ordonableColumns.map((c, index) => (
+                        {draggableColumns.map((c, index) => (
                           <Draggable
                             key={index}
                             draggableId={c.id}

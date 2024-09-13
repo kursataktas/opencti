@@ -1,11 +1,10 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import * as R from 'ramda';
 import { DataTableLinesDummy } from './DataTableLine';
 import DataTableBody from './DataTableBody';
 import { DataTableContext, defaultColumnsMap } from '../dataTableUtils';
 import { DataTableColumn, DataTableColumns, DataTableContextProps, DataTableProps, DataTableVariant, LocalStorageColumns } from '../dataTableTypes';
 import DataTableHeaders from './DataTableHeaders';
-import { SELECT_COLUMN_SIZE } from './DataTableHeader';
 
 const DataTableComponent = ({
   dataColumns,
@@ -56,7 +55,6 @@ const DataTableComponent = ({
         ...column,
         order: currentColumn?.index ?? index,
         visible: currentColumn?.visible ?? true,
-        ...(currentColumn?.size ? { size: currentColumn?.size } : {}),
       });
     }),
     // inject "navigate" action (chevron) if navigable and no specific actions defined
@@ -65,27 +63,6 @@ const DataTableComponent = ({
 
   const [columns, setColumns] = useState<DataTableColumns>(columnsInitialState);
 
-  // main tag only exists in the app, we fallback to root element for public dashboards
-  const mainElement = document.getElementsByTagName('main')[0];
-  const rootElement = document.getElementById('root');
-  const clientWidth = (mainElement ?? rootElement).clientWidth - 46;
-
-  const temporaryColumnsSize: { [key: string]: number } = {
-    '--header-select-size': SELECT_COLUMN_SIZE,
-    '--col-select-size': SELECT_COLUMN_SIZE,
-    '--header-navigate-size': SELECT_COLUMN_SIZE,
-    '--col-navigate-size': SELECT_COLUMN_SIZE,
-    '--header-table-size': clientWidth,
-    '--col-table-size': clientWidth,
-  };
-  columns.forEach((col) => {
-    if (col.visible && col.percentWidth) {
-      const size = col.percentWidth * ((clientWidth - 2 * SELECT_COLUMN_SIZE) / 100) - 2; // 2 is spacing
-      temporaryColumnsSize[`--header-${col.id}-size`] = size;
-      temporaryColumnsSize[`--col-${col.id}-size`] = size;
-    }
-  });
-
   // QUERY PART
   const [page, setPage] = useState<number>(1);
   const defaultPageSize = variant === DataTableVariant.default ? 25 : 100;
@@ -93,10 +70,6 @@ const DataTableComponent = ({
   const pageStart = useMemo(() => {
     return page ? (page - 1) * currentPageSize : 0;
   }, [page, currentPageSize]);
-
-  const dataTableHeaderRef = useRef<HTMLDivElement | null>(null);
-
-  const [reset, setReset] = useState(false);
 
   return (
     <DataTableContext.Provider
@@ -107,7 +80,7 @@ const DataTableComponent = ({
         effectiveColumns: columns.filter(({ visible }) => visible).sort((a, b) => a.order - b.order),
         initialValues,
         setColumns,
-        resetColumns: () => setReset(true),
+        // resetColumns: () => setReset(true),
         resolvePath,
         redirectionModeEnabled,
         toolbarFilters,
@@ -133,42 +106,37 @@ const DataTableComponent = ({
         setPage,
       } as DataTableContextProps}
     >
-      <div ref={dataTableHeaderRef}>
+      <div>
         {filtersComponent}
       </div>
-      <>
-        <React.Suspense
-          fallback={(
-            <div style={{ ...temporaryColumnsSize, width: '100%' }}>
-              <DataTableHeaders
-                effectiveColumns={columns}
-                sortBy={sortBy}
-                orderAsc={orderAsc}
-                dataTableToolBarComponent={dataTableToolBarComponent}
-              />
-              {<DataTableLinesDummy number={Math.max(currentPageSize, 25)} />}
-            </div>
+      <React.Suspense
+        fallback={(
+          <div style={{ width: '100%' }}>
+            <DataTableHeaders
+              effectiveColumns={columns}
+              sortBy={sortBy}
+              orderAsc={orderAsc}
+              dataTableToolBarComponent={dataTableToolBarComponent}
+            />
+            {<DataTableLinesDummy number={Math.max(currentPageSize, 25)} />}
+          </div>
           )}
-        >
-          <DataTableBody
-            dataQueryArgs={dataQueryArgs}
-            columns={columns.filter(({ visible }) => visible)}
-            redirectionMode={redirectionMode}
-            storageHelpers={storageHelpers}
-            settingsMessagesBannerHeight={settingsMessagesBannerHeight}
-            hasFilterComponent={!!filtersComponent}
-            sortBy={sortBy}
-            orderAsc={orderAsc}
-            dataTableToolBarComponent={dataTableToolBarComponent}
-            pageStart={pageStart}
-            pageSize={currentPageSize}
-            dataTableHeaderRef={dataTableHeaderRef}
-            reset={reset}
-            setReset={setReset}
-            hideHeaders={hideHeaders}
-          />
-        </React.Suspense>
-      </>
+      >
+        <DataTableBody
+          dataQueryArgs={dataQueryArgs}
+          columns={columns.filter(({ visible }) => visible)}
+          redirectionMode={redirectionMode}
+          storageHelpers={storageHelpers}
+          settingsMessagesBannerHeight={settingsMessagesBannerHeight}
+          hasFilterComponent={!!filtersComponent}
+          sortBy={sortBy}
+          orderAsc={orderAsc}
+          dataTableToolBarComponent={dataTableToolBarComponent}
+          pageStart={pageStart}
+          pageSize={currentPageSize}
+          hideHeaders={hideHeaders}
+        />
+      </React.Suspense>
     </DataTableContext.Provider>
   );
 };

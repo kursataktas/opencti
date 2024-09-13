@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Dispatch, MutableRefObject, ReactNode, RefObject, SetStateAction } from 'react';
+import type { Dispatch, MutableRefObject, ReactNode, SetStateAction } from 'react';
 import React from 'react';
 import { GraphQLTaggedNode } from 'react-relay';
 import { PopoverProps } from '@mui/material/Popover/Popover';
@@ -7,9 +7,7 @@ import type { LocalStorage } from '../../utils/hooks/useLocalStorageModel';
 import { NumberOfElements, UseLocalStorageHelpers } from '../../utils/hooks/useLocalStorage';
 import { FilterGroup } from '../../utils/filters/filtersHelpers-types';
 
-export type ColumnSizeVars = Record<string, number>;
-
-export type LocalStorageColumn = { size: number, visible?: boolean, index?: number };
+export type LocalStorageColumn = { percentWidth: number, visible?: boolean, index?: number };
 export type LocalStorageColumns = Record<string, LocalStorageColumn>;
 
 export enum DataTableVariant {
@@ -30,7 +28,6 @@ export interface DataTableColumn {
   id: string
   isSortable?: boolean
   label?: string
-  size?: number
   percentWidth: number
   render?: (v: any, helpers?: any) => ReactNode
   visible?: boolean
@@ -147,9 +144,6 @@ export interface DataTableBodyProps {
   dataQueryArgs: DataTableProps['dataQueryArgs']
   pageSize: number
   pageStart: number
-  dataTableHeaderRef: RefObject<HTMLDivElement>
-  reset: boolean,
-  setReset: Dispatch<SetStateAction<boolean>>
   hideHeaders: DataTableProps['hideHeaders']
 }
 
