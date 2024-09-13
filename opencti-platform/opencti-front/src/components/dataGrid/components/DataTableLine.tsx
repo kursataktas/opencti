@@ -11,35 +11,33 @@ import type { DataTableCellProps, DataTableLineProps } from '../dataTableTypes';
 import { DataTableColumn, DataTableVariant } from '../dataTableTypes';
 import type { Theme } from '../../Theme';
 import { getMainRepresentative } from '../../../utils/defaultRepresentatives';
+import { SELECT_COLUMN_SIZE } from './DataTableHeader';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
 const useStyles = makeStyles<Theme, { cell?: DataTableColumn, clickable?: boolean }>((theme) => createStyles({
   cellContainer: ({ cell }) => ({
+    flex: '0 0 auto',
     display: 'flex',
-    width: `calc(var(--col-${cell?.id}-size) * 1px)`,
+    width: `${cell?.percentWidth}%`,
     height: '50px',
     alignItems: 'center',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    borderBottom: `1px solid ${theme.palette.divider}`,
   }),
   cellPadding: {
     display: 'flex',
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: 8,
+    paddingRight: 8,
     width: 'fill-available',
     alignItems: 'center',
     gap: 3,
     fontSize: '13px',
   },
-  dummyContainer: {
-    display: 'flex',
-    gap: 8,
-  },
   row: ({ clickable }) => ({
     display: 'flex',
-    borderBottom: `1px solid ${theme.palette.divider}`,
     '&:hover': clickable ? {
       backgroundColor:
         theme.palette.mode === 'dark'
@@ -50,7 +48,6 @@ const useStyles = makeStyles<Theme, { cell?: DataTableColumn, clickable?: boolea
 }));
 
 export const DataTableLineDummy = () => {
-  const classes = useStyles({});
   const { effectiveColumns } = useDataTableContext();
 
   const lines = useMemo(() => (
@@ -60,13 +57,14 @@ export const DataTableLineDummy = () => {
           key={column.id}
           variant="text"
           height={35}
-          style={{ width: `calc(var(--col-${column.id}-size) * 1px)` }}
+          style={{ width: column.percentWidth ? `${column.percentWidth}%` : `${SELECT_COLUMN_SIZE}px` }}
         />
       ))}
     </>
   ), [effectiveColumns]);
+
   return (
-    <div className={classes.dummyContainer}>
+    <div style={{ display: 'flex', gap: 8 }}>
       {lines}
     </div>
   );
@@ -86,10 +84,7 @@ const DataTableCell = ({
   const helpers = useDataCellHelpers(cell);
 
   return (
-    <div
-      key={`${cell.id}_${data.id}`}
-      className={classes.cellContainer}
-    >
+    <div key={`${cell.id}_${data.id}`} className={classes.cellContainer}>
       <div className={classes.cellPadding}>
         {cell.render?.(data, helpers) ?? (<div>-</div>)}
       </div>
@@ -176,11 +171,8 @@ const DataTableLine = ({
         <div
           key={`select_${data.id}`}
           className={classes.cellContainer}
-          style={{
-            width: 'calc(var(--col-select-size) * 1px)',
-          }}
+          style={{ width: SELECT_COLUMN_SIZE }}
         >
-
           <Checkbox
             onClick={handleSelectLine}
             checked={
@@ -198,6 +190,7 @@ const DataTableLine = ({
           />
         </div>
       )}
+
       {effectiveColumns.slice(startsWithSelect ? 1 : 0, (actions || disableNavigation) ? undefined : -1).map((column) => (
         <DataTableCell
           key={column.id}
@@ -206,12 +199,13 @@ const DataTableLine = ({
           storageHelpers={storageHelpers}
         />
       ))}
+
       {(actions || endWithNavigate) && (
         <div
           key={`navigate_${data.id}`}
           className={classes.cellContainer}
           style={{
-            width: 'calc(var(--col-navigate-size) * 1px)',
+            width: SELECT_COLUMN_SIZE,
             overflow: 'initial',
           }}
         >
