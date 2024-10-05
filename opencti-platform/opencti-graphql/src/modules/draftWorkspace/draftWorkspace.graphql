@@ -6,11 +6,15 @@ type DraftWorkspace implements InternalObject & BasicObject {
     parent_types: [String!]!
     # DraftWorkspace
     name: String!
+    created_at: DateTime!
+    creators: [Creator!]
 }
 
 # Ordering
 enum DraftWorkspacesOrdering {
     name
+    created_at
+    creator
 }
 
 # Relay connections
@@ -36,6 +40,7 @@ type Query {
         search: String
     ): DraftWorkspaceConnection @auth(for: [KNOWLEDGE])
     draftWorkspaceEntities(
+        draftId: String!,
         types: [String]
         first: Int
         after: ID
