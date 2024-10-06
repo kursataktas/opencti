@@ -19,6 +19,12 @@ const DELETE_DRAFT_WORKSPACE_QUERY = gql`
     }
 `;
 
+const VALIDATE_DRAFT_WORKSPACE_QUERY = gql`
+    mutation DraftWorkspaceValidate($id: ID!) {
+        draftWorkspaceValidate(id: $id)
+    }
+`;
+
 const READ_DRAFT_WORKSPACE_QUERY = gql`
     query DraftWorkspace($id: String!) {
         draftWorkspace(id: $id) {
@@ -67,6 +73,7 @@ const CREATE_REPORT_QUERY = gql`
     mutation ReportAdd($input: ReportAddInput!) {
         reportAdd(input: $input) {
             id
+            standard_id
         }
     }
 `;
@@ -222,6 +229,44 @@ describe('Drafts workspace resolver testing', () => {
 
     expect(deleteResult.data?.draftWorkspaceDelete).toBeDefined();
     expect(deleteResult.data?.draftWorkspaceDelete).toEqual(addedDraftId);
+    expect(drafts.length).toEqual(0);
+  });
+
+  it('should validate a draft and get a correct bundle', async () => {
+    // Create a draft
+    const draftName = 'validationTestDraft';
+    const createdDraft = await queryAsAdmin({
+      query: CREATE_DRAFT_WORKSPACE_QUERY,
+      variables: { input: { name: draftName } },
+    });
+    expect(createdDraft.data?.draftWorkspaceAdd).toBeDefined();
+    addedDraftId = createdDraft.data?.draftWorkspaceAdd.id; await modifyAdminDraftContext(addedDraftId);
+
+    // Create a report in the draft
+    const REPORT_TO_CREATE = {
+      input: {
+        name: 'Report for validation draft',
+        description: 'Report for validation draft',
+        published: '2020-02-26T00:51:35.000Z',
+        confidence: 90,
+      },
+    };
+    const report = await adminQuery({ query: CREATE_REPORT_QUERY, variables: REPORT_TO_CREATE });
+    const reportStandardId = report.data.reportAdd.standard_id;
+
+    // Validate draft, verify bundle result and that draft was correctly deleted
+    const validateResult = await queryAsAdmin({
+      query: VALIDATE_DRAFT_WORKSPACE_QUERY,
+      variables: { id: addedDraftId },
+    });
+    expect(validateResult.data?.draftWorkspaceValidate).toBeDefined();
+    const bundleData = JSON.parse(validateResult.data?.draftWorkspaceValidate);
+    expect(bundleData.objects.length).toEqual(1);
+    expect(bundleData.objects[0].id).toEqual(reportStandardId);
+    const { data } = await queryAsAdmin({
+      query: LIST_DRAFT_WORKSPACES_QUERY,
+    });
+    const drafts = data?.draftWorkspaces.edges;
     expect(drafts.length).toEqual(0);
   });
 });

@@ -170,7 +170,8 @@ export const addStixDomainObject = async (context, user, stixDomainObject) => {
 };
 
 export const stixDomainObjectDelete = async (context, user, stixDomainObjectId) => {
-  const stixDomainObject = await storeLoadById(context, user, stixDomainObjectId, ABSTRACT_STIX_DOMAIN_OBJECT);
+  // If we are in a draft, we need to also search for deleted elements
+  const stixDomainObject = await storeLoadById(context, user, stixDomainObjectId, ABSTRACT_STIX_DOMAIN_OBJECT, { includeDeletedElements: true });
   if (!stixDomainObject) {
     throw FunctionalError('Cannot delete the object, Stix-Domain-Object cannot be found.');
   }
