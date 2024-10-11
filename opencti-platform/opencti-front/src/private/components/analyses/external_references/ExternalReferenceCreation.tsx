@@ -26,7 +26,6 @@ import type { Theme } from '../../../../components/Theme';
 import { ExternalReferenceAddInput, ExternalReferenceCreationMutation, ExternalReferenceCreationMutation$data } from './__generated__/ExternalReferenceCreationMutation.graphql';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 import CreateEntityControlledDial from '../../../../components/CreateEntityControlledDial';
-import { isEmpty } from 'ramda';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
