@@ -26,6 +26,7 @@ import type { Theme } from '../../../../components/Theme';
 import { ExternalReferenceAddInput, ExternalReferenceCreationMutation, ExternalReferenceCreationMutation$data } from './__generated__/ExternalReferenceCreationMutation.graphql';
 import CustomFileUploader from '../../common/files/CustomFileUploader';
 import CreateEntityControlledDial from '../../../../components/CreateEntityControlledDial';
+import { isEmpty } from 'ramda';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -69,7 +70,9 @@ export const externalReferenceCreationMutation = graphql`
 
 const externalReferenceValidation = (t: (value: string) => string) => Yup.object().shape({
   source_name: Yup.string().required(t('This field is required')),
-  external_id: Yup.string().nullable(),
+  external_id: Yup.string().nullable().when('url', (url, schema) => {
+    return url[0] ? schema : schema.required('Required : external id OR url');
+  }),
   url: Yup.string()
     .nullable()
     .matches(
