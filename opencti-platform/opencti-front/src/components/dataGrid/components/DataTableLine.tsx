@@ -151,6 +151,7 @@ const DataTableLine = ({
   };
 
   const handleNavigate = (event: React.MouseEvent) => {
+    if (!navigable) return;
     if (event.ctrlKey) {
       window.open(link, '_blank');
     } else {
@@ -159,6 +160,7 @@ const DataTableLine = ({
   };
 
   const handleRowClick = (event: React.MouseEvent) => {
+    if (!clickable) return;
     event.preventDefault();
     event.stopPropagation();
 
