@@ -54,7 +54,6 @@ interface S3File {
  * @param opts
  */
 export const uploadToStorage = (context: AuthContext, user: AuthUser, filePath: string, fileUpload: FileUploadData, opts: FileUploadOpts) => {
-  if (getDraftContext(context, user)) throw new Error('Cannot upload file in draft context');
   return upload(context, user, filePath, fileUpload, opts);
 };
 
@@ -105,6 +104,13 @@ export const deleteAllObjectFiles = async (context: AuthContext, user: AuthUser,
     ids = [...importFiles, ...exportFiles].map((file) => file.id);
   }
   logApp.debug('[FILE STORAGE] deleting all files with ids:', { ids });
+  return deleteFiles(context, user, ids);
+};
+export const deleteAllDraftFiles = async (context: AuthContext, user: AuthUser, draftId: string) => {
+  logApp.debug(`[FILE STORAGE] deleting all draft files for ${draftId}`);
+  const draftFilesPath = `${draftId}/`;
+  const draftFiles = await allFilesForPaths({ ...context, draft_context: draftId }, user, [draftFilesPath]);
+  const ids = draftFiles.map((file) => file.id);
   return deleteFiles(context, user, ids);
 };
 

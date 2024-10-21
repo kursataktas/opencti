@@ -4,7 +4,13 @@ import moment from 'moment';
 import { generateFileIndexId } from '../../../schema/identifier';
 import { ENTITY_TYPE_INTERNAL_FILE } from '../../../schema/internalObject';
 import { elAggregationCount, elCount, elDeleteInstances, elIndex } from '../../../database/engine';
-import { INDEX_INTERNAL_OBJECTS, isEmptyField, isNotEmptyField, READ_INDEX_INTERNAL_OBJECTS } from '../../../database/utils';
+import {
+  INDEX_DRAFT_OBJECTS,
+  INDEX_INTERNAL_OBJECTS,
+  isEmptyField,
+  isNotEmptyField,
+  READ_INDEX_INTERNAL_OBJECTS
+} from '../../../database/utils';
 import { type EntityOptions, type FilterGroupWithNested, internalLoadById, listAllEntities, listEntitiesPaginated, storeLoadById } from '../../../database/middleware-loader';
 import type { AuthContext, AuthUser } from '../../../types/user';
 import { type DomainFindById } from '../../../domain/domainTypes';
@@ -20,6 +26,7 @@ import type { UserAction } from '../../../listener/UserActionListener';
 import { ForbiddenAccess } from '../../../config/errors';
 import { RELATION_OBJECT_MARKING } from '../../../schema/stixRefRelationship';
 import { buildRefRelationKey } from '../../../schema/general';
+import { getDraftContext } from '../../../utils/draftContext';
 
 export const SUPPORT_STORAGE_PATH = 'support';
 export const IMPORT_STORAGE_PATH = 'import';
@@ -60,7 +67,8 @@ export const indexFileToDocument = async (context: AuthContext, file: any) => {
     // update existing internalFile (if file has been saved in another index)
     return elIndex(internalFile._index, data);
   }
-  return elIndex(INDEX_INTERNAL_OBJECTS, data);
+  const indexToTarget = getDraftContext(context, SYSTEM_USER) ? INDEX_DRAFT_OBJECTS : INDEX_INTERNAL_OBJECTS;
+  return elIndex(indexToTarget, data);
 };
 
 export const deleteDocumentIndex = async (context: AuthContext, user: AuthUser, id: string) => {
@@ -200,8 +208,10 @@ export const checkFileAccess = async (context: AuthContext, user: AuthUser, scop
 // In progress virtual files from export
 export const paginatedForPathWithEnrichment = async (context: AuthContext, user: AuthUser, path: string, entity_id?: string, opts?: FilesOptions<BasicStoreEntityDocument>) => {
   const filterOpts = { ...opts, exact_path: isEmptyField(entity_id) };
+  const draftId = getDraftContext(context, user);
+  const pathToTarget = draftId ? [path, `${draftId}/${path}`] : [path];
   const findOpts: EntityOptions<BasicStoreEntityDocument> = {
-    filters: buildFileFilters([path], filterOpts),
+    filters: buildFileFilters(pathToTarget, filterOpts),
     noFiltersChecking: true // No associated model
   };
   const orderOptions: any = {};

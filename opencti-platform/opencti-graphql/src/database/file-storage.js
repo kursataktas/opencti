@@ -11,14 +11,15 @@ import conf, { booleanConf, ENABLED_FILE_INDEX_MANAGER, logApp, logS3Debug } fro
 import { now, sinceNowInMinutes, truncate, utcDate } from '../utils/format';
 import { DatabaseError, FunctionalError, UnsupportedError } from '../config/errors';
 import { createWork, deleteWorkForFile } from '../domain/work';
-import { isNotEmptyField } from './utils';
+import {INDEX_DRAFT_OBJECTS, isNotEmptyField} from './utils';
 import { connectorsForImport } from './repository';
 import { pushToConnector } from './rabbitmq';
 import { elDeleteFilesByIds } from './file-search';
-import { isAttachmentProcessorEnabled } from './engine';
+import {elUpdate, isAttachmentProcessorEnabled} from './engine';
 import { deleteDocumentIndex, findById as documentFindById, indexFileToDocument } from '../modules/internal/document/document-domain';
 import { controlUserConfidenceAgainstElement } from '../utils/confidence-level';
 import { enrichWithRemoteCredentials } from '../config/credentials';
+import { getDraftContext } from '../utils/draftContext';
 
 // Minio configuration
 const clientEndpoint = conf.get('minio:endpoint');
@@ -446,6 +447,7 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
   if (!metadata.version) {
     metadata.version = now();
   }
+  const draft_ids = getDraftContext(context, user) ? [getDraftContext(context, user)] : null;
   const { createReadStream, filename, encoding = '' } = await fileUpload;
   const truncatedFileName = `${truncate(path.parse(filename).name, 200, false)}${truncate(path.parse(filename).ext, 10, false)}`;
   // We lowercase the file name to make it case-insensitive
@@ -460,8 +462,13 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
     if (errorOnExisting) {
       throw FunctionalError('A file already exists with this name');
     }
+    if (!currentFile._index.includes(INDEX_DRAFT_OBJECTS) && getDraftContext(context, user)) {
+      const source = 'ctx._source.draft_ids = params.draft_ids;';
+      const params = { draft_ids: [...(currentFile.drafts_ids ?? []), getDraftContext(context, user)] };
+      await elUpdate(currentFile._index, currentFile.internal_id, { script: { source, lang: 'painless', params } });
+    }
   }
-
+  if (getDraftContext(context, user)) key = `${getDraftContext(context, user)}/${key}`;
   const creatorId = currentFile?.metaData?.creator_id ? currentFile.metaData.creator_id : user.id;
 
   // Upload the data
@@ -489,6 +496,7 @@ export const upload = async (context, user, filePath, fileUpload, opts) => {
   // Register in elastic
   const file = {
     id: key,
+    draft_ids,
     name: truncatedFileName,
     size: fileSize,
     information: '',

@@ -601,7 +601,6 @@ export const stixCoreAnalysis = async (context, user, entityId, contentSource, c
 };
 
 export const stixCoreObjectImportPush = async (context, user, id, file, args = {}) => {
-  if (getDraftContext(context, user)) throw new Error('Cannot import in draft');
   let lock;
   const { noTriggerImport, version: fileVersion, fileMarkings: file_markings, importContextEntities } = args;
   const previous = await storeLoadByIdWithRefs(context, user, id);
@@ -649,6 +648,7 @@ export const stixCoreObjectImportPush = async (context, user, id, file, args = {
     const files = [...(previous.x_opencti_files ?? []).filter((f) => f.id !== up.id), eventFile];
     await elUpdateElement(context, user, {
       _index: previous._index,
+      _id: previous._id,
       internal_id: internalId,
       entity_type: previous.entity_type, // required for schema validation
       updated_at: now(),

@@ -15,6 +15,7 @@ import { isFeatureEnabled } from '../../config/conf';
 import { getDraftContext } from '../../utils/draftContext';
 import { ENTITY_TYPE_USER } from '../../schema/internalObject';
 import { usersSessionRefresh } from '../../domain/user';
+import {deleteAllDraftFiles} from "../../database/file-storage-helper";
 
 export const findById = (context: AuthContext, user: AuthUser, id: string) => {
   return storeLoadById<BasicStoreEntityDraftWorkspace>(context, user, id, ENTITY_TYPE_DRAFT_WORKSPACE);
@@ -70,6 +71,7 @@ export const deleteDraftWorkspace = async (context: AuthContext, user: AuthUser,
     throw FunctionalError(`Draft workspace ${id} cannot be found`, id);
   }
 
+  await deleteAllDraftFiles(context, user, id);
   await elDeleteDraftElements(context, user, id);
   await deleteDraftContextFromUsers(context, user, id);
   await deleteElementById(context, user, id, ENTITY_TYPE_DRAFT_WORKSPACE);
