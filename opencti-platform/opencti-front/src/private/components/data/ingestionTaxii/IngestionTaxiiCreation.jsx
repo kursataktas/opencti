@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as PropTypes from 'prop-types';
 import { Field, Form, Formik } from 'formik';
 import withStyles from '@mui/styles/withStyles';
@@ -7,6 +7,8 @@ import * as Yup from 'yup';
 import { graphql } from 'react-relay';
 import * as R from 'ramda';
 import MenuItem from '@mui/material/MenuItem';
+import IconButton from '@mui/material/IconButton';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { BASIC_AUTH, BEARER_AUTH, CERT_AUTH, getAuthenticationValue } from '../../../../utils/ingestionAuthentificationUtils';
 import Drawer, { DrawerVariant } from '../../common/drawer/Drawer';
 import inject18n from '../../../../components/i18n';
@@ -59,6 +61,7 @@ const ingestionTaxiiCreationValidation = (t) => Yup.object().shape({
 
 const IngestionTaxiiCreation = (props) => {
   const { t, classes } = props;
+  const [showToken, setShowToken] = useState(false);
   const onSubmit = (values, { setSubmitting, resetForm }) => {
     const authentifcationValueResolved = getAuthenticationValue(values);
 
@@ -94,6 +97,11 @@ const IngestionTaxiiCreation = (props) => {
       },
     });
   };
+
+  const toggleTokenVisibility = () => {
+    setShowToken(!showToken);
+  };
+
   return (
     <Drawer
       title={t('Create a TAXII ingester')}
@@ -189,62 +197,116 @@ const IngestionTaxiiCreation = (props) => {
                 </MenuItem>
               </Field>
               {values.authentication_type === BASIC_AUTH && (
-                <>
-                  <Field
-                    component={TextField}
-                    variant="standard"
-                    name="username"
-                    label={t('Username')}
-                    fullWidth={true}
-                    style={fieldSpacingContainerStyle}
-                  />
+              <>
+                <Field
+                  component={TextField}
+                  variant="standard"
+                  name="username"
+                  label={t('Username')}
+                  fullWidth={true}
+                  style={fieldSpacingContainerStyle}
+                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <Field
                     component={TextField}
                     variant="standard"
                     name="password"
+                    type={showToken ? 'text' : 'password'}
                     label={t('Password')}
                     fullWidth={true}
                     style={fieldSpacingContainerStyle}
                   />
-                </>
+                  <IconButton
+                    onClick={toggleTokenVisibility}
+                    aria-label={showToken ? t('Hide') : t('Show')}
+                    style={{
+                      position: 'absolute',
+                      right: 1,
+                      top: '60%',
+                      margin: 0,
+                      padding: 0,
+                      zIndex: 1,
+                    }}
+                    disableRipple
+                  >
+                    {showToken ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </div>
+              </>
               )}
               {values.authentication_type === BEARER_AUTH && (
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <Field
                   component={TextField}
                   variant="standard"
                   name="authentication_value"
+                  type={showToken ? 'text' : 'password'}
                   label={t('Token')}
                   fullWidth={true}
                   style={fieldSpacingContainerStyle}
                 />
+                <IconButton
+                  onClick={toggleTokenVisibility}
+                  aria-label={showToken ? t('Hide') : t('Show')}
+                  style={{
+                    position: 'absolute',
+                    right: 1,
+                    top: '60%',
+                    margin: 0,
+                    padding: 0,
+                    zIndex: 1,
+                  }}
+                  disableRipple
+                >
+                  {showToken ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </div>
               )}
               {values.authentication_type === CERT_AUTH && (
-                <>
-                  <Field
-                    component={TextField}
-                    variant="standard"
-                    name="cert"
-                    label={t('Certificate (base64)')}
-                    fullWidth={true}
-                    style={fieldSpacingContainerStyle}
-                  />
+              <>
+                <Field
+                  component={TextField}
+                  variant="standard"
+                  name="cert"
+                  label={t('Certificate (base64)')}
+                  fullWidth={true}
+                  style={fieldSpacingContainerStyle}
+                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <Field
                     component={TextField}
                     variant="standard"
                     name="key"
+                    type={showToken ? 'text' : 'password'}
                     label={t('Key (base64)')}
                     fullWidth={true}
                     style={fieldSpacingContainerStyle}
                   />
-                  <Field
-                    component={TextField}
-                    variant="standard"
-                    name="ca"
-                    label={t('CA certificate (base64)')}
-                    fullWidth={true}
-                    style={fieldSpacingContainerStyle}
-                  />
-                </>
+                  <IconButton
+                    onClick={toggleTokenVisibility}
+                    aria-label={showToken ? t('Hide') : t('Show')}
+                    style={{
+                      position: 'absolute',
+                      right: 1,
+                      top: '60%',
+                      margin: 0,
+                      padding: 0,
+                      zIndex: 1,
+                    }}
+                    disableRipple
+                  >
+                    {showToken ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </div>
+                <Field
+                  component={TextField}
+                  variant="standard"
+                  name="ca"
+                  label={t('CA certificate (base64)')}
+                  fullWidth={true}
+                  style={fieldSpacingContainerStyle}
+                />
+              </>
               )}
               <CreatorField
                 name="user_id"

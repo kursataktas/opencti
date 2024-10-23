@@ -13,6 +13,8 @@ import Tooltip from '@mui/material/Tooltip';
 import { InformationOutline } from 'mdi-material-ui';
 import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Drawer, { DrawerVariant } from '../../common/drawer/Drawer';
 import { useFormatter } from '../../../../components/i18n';
 import { commitMutation, fetchQuery, handleErrorInForm, MESSAGING$ } from '../../../../relay/environment';
@@ -100,6 +102,7 @@ const SyncCreation = ({ paginationOptions }) => {
   const classes = useStyles();
   const [verified, setVerified] = useState(false);
   const [streams, setStreams] = useState([]);
+  const [showToken, setShowToken] = useState(false);
   const handleVerify = (values, setErrors) => {
     const input = { ...values, user_id: values.user_id?.value };
     commitMutation({
@@ -179,6 +182,10 @@ const SyncCreation = ({ paginationOptions }) => {
       });
   };
 
+  const toggleTokenVisibility = () => {
+    setShowToken(!showToken);
+  };
+
   return (
     <Drawer
       title={t_i18n('Create a synchronizer')}
@@ -247,15 +254,33 @@ const SyncCreation = ({ paginationOptions }) => {
                     disabled={streams.length > 0}
                     style={fieldSpacingContainerStyle}
                   />
-                  <Field
-                    component={TextField}
-                    variant="standard"
-                    name="token"
-                    label={t_i18n('Remote OpenCTI token')}
-                    fullWidth={true}
-                    disabled={streams.length > 0}
-                    style={fieldSpacingContainerStyle}
-                  />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Field
+                      component={TextField}
+                      variant="standard"
+                      name="token"
+                      type={showToken ? 'text' : 'password'}
+                      label={t_i18n('Remote OpenCTI token')}
+                      fullWidth={true}
+                      disabled={streams.length > 0}
+                      style={fieldSpacingContainerStyle}
+                    />
+                    <IconButton
+                      onClick={toggleTokenVisibility}
+                      aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
+                      style={{
+                        position: 'absolute',
+                        right: 1,
+                        top: '60%',
+                        margin: 0,
+                        padding: 0,
+                        zIndex: 1,
+                      }}
+                      disableRipple
+                    >
+                      {showToken ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </div>
                   {streams.length > 0 && (
                     <Field
                       component={SelectField}
@@ -266,7 +291,7 @@ const SyncCreation = ({ paginationOptions }) => {
                       containerstyle={fieldSpacingContainerStyle}
                       renderValue={(value) => streams.filter((stream) => stream.value === value).at(0)
                         .name
-                      }
+                            }
                     >
                       {streams.map(
                         ({ value, label, name, description, filters }) => {
@@ -295,7 +320,7 @@ const SyncCreation = ({ paginationOptions }) => {
                                     />
                                   </Grid>
                                 </Grid>
-                              }
+                                        }
                               placement="bottom-start"
                             >
                               <MenuItem key={value} value={value}>
@@ -313,7 +338,7 @@ const SyncCreation = ({ paginationOptions }) => {
                         variant="contained"
                         color="secondary"
                         onClick={() => handleGetStreams(values, setErrors, errors)
-                        }
+                              }
                         disabled={isSubmitting}
                         classes={{ root: classes.button }}
                       >
