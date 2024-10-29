@@ -75,6 +75,7 @@ const DataTableHeader: FunctionComponent<DataTableHeaderProps> = ({
 
   const {
     columns,
+    setColumns,
     availableFilterKeys,
     onSort,
     variant,
@@ -134,11 +135,11 @@ const DataTableHeader: FunctionComponent<DataTableHeaderProps> = ({
 
       {variant !== DataTableVariant.inline && (
         <SimpleDraggrable
-          position={{ x: 3, y: 0 }}
+          position={{ x: 3, y: -3 }}
           axis="x"
           onStop={(_, { lastX }) => {
             if (containerRef?.current) {
-              // Compute new with in percentage of the column.
+              // Compute new width in percentage of the column.
               const containerWidth = containerRef.current.clientWidth;
               const columnWidth = (column.percentWidth * containerWidth) / 100;
               const newColumnWidth = columnWidth + lastX;
@@ -154,7 +155,8 @@ const DataTableHeader: FunctionComponent<DataTableHeaderProps> = ({
               // Total width should be at least 100% so extend neighbor column if necessary.
               const sumPercentage = newColumns.reduce((acc, col) => acc + (col.percentWidth ?? 0), 0);
               if (sumPercentage < 100) {
-                const neighborOrder = column.order === 0 ? 1 : column.order - 1;
+                const maxOrder = Math.max(...newColumns.flatMap((c) => c.order ?? []));
+                const neighborOrder = column.order < maxOrder ? column.order + 1 : column.order - 1;
                 newColumns = newColumns.map((c) => {
                   if (c.order === neighborOrder) {
                     const percentWidth = c.percentWidth + (100 - sumPercentage);
@@ -164,11 +166,15 @@ const DataTableHeader: FunctionComponent<DataTableHeaderProps> = ({
                 });
               }
 
-              // setColumns(newColumns);
-              setLocalStorageColumns((curr: LocalStorageColumns) => ({
-                ...curr,
-                [column.id]: { ...curr[column.id], percentWidth: newPercentage },
-              }));
+              setColumns(newColumns);
+              setLocalStorageColumns((curr: LocalStorageColumns) => {
+                const cols = { ...curr };
+                Object.keys(curr).forEach((key) => {
+                  const col = newColumns.find((c) => c.id === key);
+                  if (col) cols[key] = { ...cols[key], percentWidth: col.percentWidth };
+                });
+                return curr;
+              });
             }
           }}
         >

@@ -4,7 +4,6 @@ import DataTableHeaders from './DataTableHeaders';
 import { useDataTableContext } from '../dataTableUtils';
 import { DataTableBodyProps, DataTableLineProps, DataTableVariant, LocalStorageColumns } from '../dataTableTypes';
 import DataTableLine, { DataTableLinesDummy } from './DataTableLine';
-import { SELECT_COLUMN_SIZE } from './DataTableHeader';
 import { useDataTableToggle } from '../dataTableHooks';
 
 const DataTableBody = ({
@@ -28,7 +27,6 @@ const DataTableBody = ({
     variant,
     useDataTable,
     resolvePath,
-    actions,
   } = useDataTableContext();
 
   const { data: queryData, isLoading, loadMore, hasMore } = useDataTable(dataQueryArgs);
@@ -49,9 +47,6 @@ const DataTableBody = ({
   // TABLE HANDLING
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [localStorageColumns] = useDataTableLocalStorage<LocalStorageColumns>(`${storageKey}_columns`, {}, true);
-
-  const startsWithSelect = columns.at(0)?.id === 'select';
-  const endsWithNavigate = columns.at(-1)?.id === 'navigate';
 
   const {
     selectedElements,
@@ -90,7 +85,6 @@ const DataTableBody = ({
 
   const effectiveColumns = useMemo(
     () => {
-      console.log(localStorageColumns);
       return columns.map((col) => {
         const localWidth = localStorageColumns[col.id]?.percentWidth;
         return {
@@ -101,16 +95,6 @@ const DataTableBody = ({
     },
     [columns, localStorageColumns],
   );
-
-  // This offset is used to be able to determine column in percentage but
-  // taking in account we don't want to take checkbox and actions columns in account.
-  let offset = 0;
-  if (startsWithSelect) offset += SELECT_COLUMN_SIZE;
-  if (endsWithNavigate || actions) offset += SELECT_COLUMN_SIZE;
-  const containerStyle: CSSProperties = {
-    paddingLeft: `${offset}px`,
-    transform: `translateX(-${offset}px)`,
-  };
 
   const [tableHeight, setTableHeight] = useState(0);
   useLayoutEffect(() => {
@@ -129,40 +113,37 @@ const DataTableBody = ({
     }
   }, [setTableHeight, settingsMessagesBannerHeight]);
 
-  return (
-    <div
-      style={{
-        overflowX: 'auto',
-        maxHeight: `${tableHeight}px`,
-      }}
-    >
-      <div ref={containerRef} style={containerStyle}>
-        {(variant !== DataTableVariant.widget && !hideHeaders) && (
-          <DataTableHeaders
-            effectiveColumns={effectiveColumns}
-            sortBy={sortBy}
-            orderAsc={orderAsc}
-            dataTableToolBarComponent={dataTableToolBarComponent}
-            containerRef={containerRef}
-          />
-        )}
+  const containerStyle: CSSProperties = {
+    overflowX: 'auto',
+    maxHeight: `${tableHeight}px`,
+  };
 
-        {/* If we have perf issues we should find a way to memoize this */}
-        {resolvedData.map((row: { id: string }, index: number) => {
-          return (
-            <DataTableLine
-              key={row.id}
-              row={row}
-              redirectionMode={redirectionMode}
-              storageHelpers={storageHelpers}
-              effectiveColumns={effectiveColumns}
-              index={index}
-              onToggleShiftEntity={onToggleShiftEntity}
-            />
-          );
-        })}
-        {isLoading && <DataTableLinesDummy number={Math.max(pageSize, 25)} />}
-      </div>
+  return (
+    <div style={containerStyle} ref={containerRef}>
+      {(variant !== DataTableVariant.widget && !hideHeaders) && (
+      <DataTableHeaders
+        effectiveColumns={effectiveColumns}
+        sortBy={sortBy}
+        orderAsc={orderAsc}
+        dataTableToolBarComponent={dataTableToolBarComponent}
+      />
+      )}
+
+      {/* If we have perf issues we should find a way to memoize this */}
+      {resolvedData.map((row: { id: string }, index: number) => {
+        return (
+          <DataTableLine
+            key={row.id}
+            row={row}
+            redirectionMode={redirectionMode}
+            storageHelpers={storageHelpers}
+            effectiveColumns={effectiveColumns}
+            index={index}
+            onToggleShiftEntity={onToggleShiftEntity}
+          />
+        );
+      })}
+      {isLoading && <DataTableLinesDummy number={Math.max(pageSize, 25)} />}
     </div>
   );
 };

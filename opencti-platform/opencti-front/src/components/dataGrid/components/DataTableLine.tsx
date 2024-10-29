@@ -36,9 +36,10 @@ const useStyles = makeStyles<Theme, { cell?: DataTableColumn, clickable?: boolea
     gap: 3,
     fontSize: '13px',
   },
-  row: ({ clickable }) => ({
+  link: ({ clickable }) => ({
+    color: 'inherit',
+    display: 'block',
     borderBottom: `1px solid ${theme.palette.divider}`,
-    display: 'flex',
     '&:hover': clickable ? {
       backgroundColor:
         theme.palette.mode === 'dark'
@@ -134,7 +135,7 @@ const DataTableLine = ({
   } = useDataTableToggle(storageKey);
 
   const startsWithSelect = effectiveColumns.at(0)?.id === 'select';
-  const endWithNavigate = effectiveColumns.at(-1)?.id === 'navigate';
+  const endsWithNavigate = effectiveColumns.at(-1)?.id === 'navigate';
 
   const handleSelectLine = (event: React.MouseEvent) => {
     if (event.shiftKey) {
@@ -167,64 +168,72 @@ const DataTableLine = ({
     }
   };
 
+  let offset = 0;
+  if (startsWithSelect) offset += SELECT_COLUMN_SIZE;
+  if (endsWithNavigate || actions) offset += SELECT_COLUMN_SIZE;
+
   return (
-    <div
-      key={row.id}
-      className={classes.row}
-      style={{ cursor: clickable ? 'pointer' : 'unset' }}
-      // We need both to handle accessibility and widget.
-      onMouseDown={variant === DataTableVariant.widget ? handleNavigate : undefined}
-      onClick={variant !== DataTableVariant.widget ? handleRowClick : undefined}
-      data-testid={getMainRepresentative(data)}
+    <a
+      href={navigable ? link : undefined}
+      className={classes.link}
+      style={{ paddingRight: offset }}
     >
-      <a
-        style={{ display: 'flex', color: 'inherit' }}
-        href={navigable ? link : undefined}
-      >
-        {startsWithSelect && (
-          <div
-            key={`select_${data.id}`}
-            className={classes.cellContainer}
-            style={{ width: SELECT_COLUMN_SIZE }}
-          >
-            <Checkbox
-              onClick={handleSelectLine}
-              checked={
-                (selectAll
-                  && !((data.id || 'id') in (deSelectedElements || {})))
-                || (data.id || 'id') in (selectedElements || {})
-              }
-            />
-          </div>
-        )}
-        {effectiveColumns.slice(startsWithSelect ? 1 : 0, (actions || disableNavigation) ? undefined : -1).map((column) => (
-          <DataTableCell
-            key={column.id}
-            cell={column}
-            data={data}
-            storageHelpers={storageHelpers}
-          />
-        ))}
-      </a>
-      {(actions || endWithNavigate) && (
+      <div>
         <div
-          key={`navigate_${data.id}`}
-          className={classes.cellContainer}
-          style={{
-            width: SELECT_COLUMN_SIZE,
-            overflow: 'initial',
-          }}
-          onClick={(e) => e.stopPropagation()}
+          key={row.id}
+          style={{ cursor: clickable ? 'pointer' : 'unset', display: 'flex' }}
+          // We need both to handle accessibility and widget.
+          onMouseDown={variant === DataTableVariant.widget ? handleNavigate : undefined}
+          onClick={variant !== DataTableVariant.widget ? handleRowClick : undefined}
+          data-testid={getMainRepresentative(data)}
         >
-          {actions && actions(data)}
-          {endWithNavigate && (
-            <IconButton onClick={() => navigate(link)}>
-              <KeyboardArrowRightOutlined />
-            </IconButton>
+          {startsWithSelect && (
+            <div
+              key={`select_${data.id}`}
+              className={classes.cellContainer}
+              style={{ width: SELECT_COLUMN_SIZE }}
+            >
+              <Checkbox
+                onClick={handleSelectLine}
+                checked={
+                  (selectAll
+                    && !((data.id || 'id') in (deSelectedElements || {})))
+                  || (data.id || 'id') in (selectedElements || {})
+                }
+              />
+            </div>
+          )}
+
+          {effectiveColumns.slice(startsWithSelect ? 1 : 0, (actions || disableNavigation) ? undefined : -1).map((column) => (
+            <DataTableCell
+              key={column.id}
+              cell={column}
+              data={data}
+              storageHelpers={storageHelpers}
+            />
+          ))}
+
+          {(actions || endsWithNavigate) && (
+            <div
+              key={`navigate_${data.id}`}
+              className={classes.cellContainer}
+              style={{
+                width: SELECT_COLUMN_SIZE,
+                overflow: 'initial',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {actions && actions(data)}
+              {endsWithNavigate && (
+                <IconButton onClick={() => navigate(link)}>
+                  <KeyboardArrowRightOutlined />
+                </IconButton>
+              )}
+            </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    </a>
   );
 };
 

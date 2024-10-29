@@ -169,7 +169,6 @@ export interface DataTableFiltersProps {
 }
 
 export interface DataTableHeadersProps {
-  containerRef?: MutableRefObject<HTMLDivElement | null>
   effectiveColumns: DataTableColumns
   sortBy: DataTableProps['sortBy']
   orderAsc: DataTableProps['orderAsc']
