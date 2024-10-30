@@ -52,6 +52,7 @@ import useAuth from '../../../../utils/hooks/useAuth';
 import type { Theme } from '../../../../components/Theme';
 import useApiMutation from '../../../../utils/hooks/useApiMutation';
 import ItemCopy from '../../../../components/ItemCopy';
+import { maskToken, toggleTokenVisibility } from '../../../../utils/String';
 
 const startDate = yearsAgo(1);
 const endDate = now();
@@ -353,13 +354,6 @@ const User: FunctionComponent<UserProps> = ({ data, refetch }) => {
     historyTypes = ['History', 'Activity'];
   }
 
-  const toggleTokenVisibility = () => {
-    setShowToken(!showToken);
-  };
-  const maskToken = (api_token: string) => {
-    return '•'.repeat(api_token.length);
-  };
-
   return (
     <>
       <Grid
@@ -447,7 +441,8 @@ const User: FunctionComponent<UserProps> = ({ data, refetch }) => {
                       padding: `0 ${theme.spacing(1)}`,
                     }}
                     disableRipple
-                    onClick={toggleTokenVisibility} aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
+                    onClick={() => setShowToken(toggleTokenVisibility(showToken))}
+                    aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
                   >
                     {showToken ? <VisibilityOff/> : <Visibility/>}
                   </IconButton>

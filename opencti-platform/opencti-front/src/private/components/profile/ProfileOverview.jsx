@@ -33,6 +33,7 @@ import { fieldSpacingContainerStyle } from '../../../utils/field';
 import OtpInputField, { OTP_CODE_SIZE } from '../../../public/components/OtpInputField';
 import ItemCopy from '../../../components/ItemCopy';
 import { availableLanguage } from '../../../components/AppIntlProvider';
+import { maskToken, toggleTokenVisibility } from '../../../utils/String';
 
 const styles = () => ({
   container: {
@@ -279,13 +280,6 @@ const ProfileOverviewComponent = (props) => {
         resetForm();
       },
     });
-  };
-
-  const toggleTokenVisibility = () => {
-    setShowToken(!showToken);
-  };
-  const maskToken = (api_token) => {
-    return '•'.repeat(api_token.length);
   };
 
   return (
@@ -613,7 +607,8 @@ const ProfileOverviewComponent = (props) => {
                 padding: `0 ${theme.spacing(1)}`,
               }}
               disableRipple
-              onClick={toggleTokenVisibility} aria-label={showToken ? t('Hide') : t('Show')}
+              onClick={() => setShowToken(toggleTokenVisibility(showToken))}
+              aria-label={showToken ? t('Hide') : t('Show')}
             >
               {showToken ? <VisibilityOff/> : <Visibility/>}
             </IconButton>

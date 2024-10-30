@@ -133,3 +133,7 @@ export const splitMultilines = (str) => (str ?? '')
   .split(/\r?\n/)
   .filter((v) => !!v)
   .map((s) => s.trim());
+
+export const toggleTokenVisibility = (currentVisibility) => !currentVisibility;
+
+export const maskToken = (api_token) => '•'.repeat(api_token.length);
