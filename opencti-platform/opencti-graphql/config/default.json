@@ -6,14 +6,7 @@
     "public_dashboard_authorized_domains": "",
     "enabled": true,
     "enabled_ui": true,
-    "disabled_dev_features": [
-      "FAB_REPLACEMENT",
-      "NEW_IMPORT_SCREENS",
-      "FILIGRAN_LOADER",
-      "CONTAINERS_AUTHORIZED_MEMBERS",
-      "TELEMETRY_COUNT_ACTIVE_USERS",
-      "PROTECT_SENSITIVE_CHANGES"
-    ],
+    "enabled_dev_features": [],
     "https_cert": {
       "ca": [],
       "key": null,

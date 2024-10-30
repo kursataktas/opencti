@@ -468,10 +468,8 @@ export const setStoppingState = (state) => {
   platformState.stopping = state;
 };
 
-export const DISABLED_FEATURE_FLAGS = nconf.get('app:disabled_dev_features') ?? [];
-export const isFeatureEnabled = (feature) => {
-  return DISABLED_FEATURE_FLAGS.length === 0 || !DISABLED_FEATURE_FLAGS.includes(feature);
-};
+export const ENABLED_FEATURE_FLAGS = nconf.get('app:enabled_dev_features') ?? [];
+export const isFeatureEnabled = (feature) => ENABLED_FEATURE_FLAGS.includes(feature);
 
 export const REDIS_PREFIX = nconf.get('redis:namespace') ? `${nconf.get('redis:namespace')}:` : '';
 export const TOPIC_PREFIX = `${REDIS_PREFIX}_OPENCTI_DATA_`;
