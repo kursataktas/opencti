@@ -320,9 +320,8 @@ UserEditionOverviewComponentProps
               aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
               style={{
                 position: 'absolute',
-                right: 10,
-                top: '50%',
-                transform: 'translateY(-25%)',
+                right: 1,
+                top: '60%',
                 margin: 0,
                 padding: 0,
                 zIndex: 1,

@@ -3,7 +3,7 @@ import { graphql, useFragment } from 'react-relay';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import { DeleteForeverOutlined, DeleteOutlined, RefreshOutlined } from '@mui/icons-material';
+import { DeleteForeverOutlined, DeleteOutlined, RefreshOutlined, Visibility, VisibilityOff } from '@mui/icons-material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -234,6 +234,7 @@ const User: FunctionComponent<UserProps> = ({ data, refetch }) => {
   const { t_i18n, nsdt, fsd, fldt } = useFormatter();
   const { me } = useAuth();
   const theme = useTheme<Theme>();
+  const [showToken, setShowToken] = useState<boolean>(false);
   const [displayKillSession, setDisplayKillSession] = useState<boolean>(false);
   const [displayKillSessions, setDisplayKillSessions] = useState<boolean>(false);
   const [displayRenewToken, setDisplayRenewToken] = useState<boolean>(false);
@@ -351,6 +352,14 @@ const User: FunctionComponent<UserProps> = ({ data, refetch }) => {
   } else if (isGrantedToAudit && isGrantedToKnowledge) {
     historyTypes = ['History', 'Activity'];
   }
+
+  const toggleTokenVisibility = () => {
+    setShowToken(!showToken);
+  };
+  const maskToken = (api_token: string) => {
+    return '•'.repeat(api_token.length);
+  };
+
   return (
     <>
       <Grid
@@ -416,7 +425,33 @@ const User: FunctionComponent<UserProps> = ({ data, refetch }) => {
                   </Tooltip>
                 </Security>
                 <div className="clearfix"/>
-                <pre style={{ margin: 0 }}><ItemCopy content={user.api_token} /></pre>
+                <pre
+                  style={{
+                    margin: 0,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                  }}
+                >
+                  <span style={{ flexGrow: 1 }}>
+                    <ItemCopy
+                      content={showToken ? user.api_token : maskToken(user.api_token)}
+                      value={user.api_token}
+                    />
+                  </span>
+                  <IconButton
+                    style={{
+                      cursor: 'pointer',
+                      color: theme.palette.primary.main,
+                      padding: '0px 8px 0px 8px',
+                    }}
+                    disableRipple
+                    onClick={toggleTokenVisibility} aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
+                  >
+                    {showToken ? <VisibilityOff/> : <Visibility/>}
+                  </IconButton>
+                </pre>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="h3" gutterBottom={true}>
