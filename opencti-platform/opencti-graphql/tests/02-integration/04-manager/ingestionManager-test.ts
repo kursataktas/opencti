@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import * as readline from 'node:readline';
 import { prepareTaxiiGetParam, processCsvLines, processTaxiiResponse, type TaxiiResponseData } from '../../../src/manager/ingestionManager';
 import { ADMIN_USER, testContext, USER_EDITOR } from '../../utils/testQuery';
 import { addIngestion as addTaxiiIngestion, findById as findTaxiiIngestionById } from '../../../src/modules/ingestion/ingestion-taxii-domain';
@@ -8,8 +7,10 @@ import type { StixReport } from '../../../src/types/stix-sdo';
 import { addIngestionCsv, findById as findIngestionCsvById } from '../../../src/modules/ingestion/ingestion-csv-domain';
 import { createCsvMapper } from '../../../src/modules/internal/csvMapper/csvMapper-domain';
 import { parseCsvMapper } from '../../../src/modules/internal/csvMapper/csvMapper-utils';
-import { csvMapperMockSimpleCities } from '../../data/importCsv-connector/csv-mapper-cities';
-import { fileToReadStream } from '../../../src/database/file-storage-helper';
+import { readCsvFromFileStream } from '../../utils/testQueryHelper';
+import { csvMapperMockCities } from './ingestionManager/csv-mapper-cities';
+import type { CsvMapperParsed } from '../../../src/modules/internal/csvMapper/csvMapper-types';
+import type { BasicStoreEntityIngestionCsv } from '../../../src/modules/ingestion/ingestion-types';
 
 describe('Verify taxii ingestion', () => {
   it('should Taxii server response with no pagination (no next, no more, no x-taxii-date-added-last)', async () => {
@@ -225,12 +226,18 @@ describe('Verify taxii ingestion', () => {
 });
 
 describe('Verify csv ingestion', () => {
-  it('should csv ingestion run', async () => {
+  let csvLines: string[];
+  let csvMapperParsed: CsvMapperParsed;
+  let ingestionCsv: BasicStoreEntityIngestionCsv;
+
+  it('should prepare ingestion data', async () => {
+    const mapper = csvMapperMockCities as CsvMapperParsed;
     const csvMapperInput : CsvMapperAddInput = {
-      has_header: true,
+      has_header: mapper.has_header,
       name: 'testCsvIngestionMapper',
-      representations: JSON.stringify(csvMapperMockSimpleCities.representations),
-      separator: ',',
+      representations: JSON.stringify(mapper.representations),
+      separator: mapper.separator,
+      skipLineChar: mapper.skipLineChar
     };
 
     const mapperCreated = await createCsvMapper(testContext, ADMIN_USER, csvMapperInput);
@@ -242,32 +249,34 @@ describe('Verify csv ingestion', () => {
       csv_mapper_id: mapperCreated.id,
       user_id: USER_EDITOR.id
     };
-    const ingestionCsv = await addIngestionCsv(testContext, ADMIN_USER, ingestionCsvInput);
+    ingestionCsv = await addIngestionCsv(testContext, ADMIN_USER, ingestionCsvInput);
     expect(ingestionCsv.id).toBeDefined();
     expect(ingestionCsv.internal_id).toBeDefined();
 
-    const csvMapperParsed = parseCsvMapper(mapperCreated);
+    csvMapperParsed = parseCsvMapper(mapperCreated);
 
-    const file = fileToReadStream('./tests/data/importCsv-connector', 'csv-file-cities-for-importCsv-connector.csv', 'csv-file-cities-for-importCsv-connector.csv', 'text/csv');
-    const rl = readline.createInterface({ input: file.createReadStream(), crlfDelay: Infinity });
+    csvLines = await readCsvFromFileStream('./tests/02-integration/04-manager/ingestionManager', 'csv-file-cities.csv');
+  });
 
-    const csvLines: string[] = [];
-    // Need an async interator to prevent blocking
-    // eslint-disable-next-line no-restricted-syntax
-    for await (const line of rl) {
-      csvLines.push(line);
-    }
-    const csvLinesClone = [...csvLines];
-    await processCsvLines(testContext, ingestionCsv, csvMapperParsed, csvLines, null);
+  it('should csv ingestion run', async () => {
+    const { isUnchangedData, objectsInBundleCount } = await processCsvLines(testContext, ingestionCsv, csvMapperParsed, [...csvLines], null);
+    expect(isUnchangedData).toBeFalsy();
 
-    const ingestionCsvafterFirstProcess = await findIngestionCsvById(testContext, ADMIN_USER, ingestionCsv.id);
+    // csv-file-cities.csv content:
+    // skip lines and header => 0 object
+    // 1 city +1 label => 2 objects
+    // skip line => 0 object
+    // 1 city +1 label => 2 objects
+    // 1 city (duplicate) +1 label => 2 objects
+    // 1 city +1 label => 2 objects
+    expect(objectsInBundleCount).toBe(8);
+  });
 
+  it('should same csv file ingestion be skipped', async () => {
     // Second time hash is the same so it should not process any objects
-    await processCsvLines(testContext, ingestionCsvafterFirstProcess, csvMapperParsed, csvLinesClone, null);
-    const ingestionCsvafterSecondProcess = await findIngestionCsvById(testContext, ADMIN_USER, ingestionCsvafterFirstProcess.id);
-
-    expect(ingestionCsvafterFirstProcess.current_state_hash).toBe(ingestionCsvafterSecondProcess.current_state_hash);
-
-    // Not much to expect, no exception at least.
+    const ingestionEntity = await findIngestionCsvById(testContext, ADMIN_USER, ingestionCsv.id);
+    const { isUnchangedData, objectsInBundleCount } = await processCsvLines(testContext, ingestionEntity, csvMapperParsed, [...csvLines], null);
+    expect(isUnchangedData).toBeTruthy();
+    expect(objectsInBundleCount).toBe(0);
   });
 });
