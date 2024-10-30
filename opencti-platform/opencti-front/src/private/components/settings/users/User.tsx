@@ -444,7 +444,7 @@ const User: FunctionComponent<UserProps> = ({ data, refetch }) => {
                     style={{
                       cursor: 'pointer',
                       color: theme.palette.primary.main,
-                      padding: '0px 8px 0px 8px',
+                      padding: `0 ${theme.spacing(1)}`,
                     }}
                     disableRipple
                     onClick={toggleTokenVisibility} aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}

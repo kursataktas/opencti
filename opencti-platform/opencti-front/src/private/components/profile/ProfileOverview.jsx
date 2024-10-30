@@ -34,7 +34,7 @@ import OtpInputField, { OTP_CODE_SIZE } from '../../../public/components/OtpInpu
 import ItemCopy from '../../../components/ItemCopy';
 import { availableLanguage } from '../../../components/AppIntlProvider';
 
-const styles = (theme) => ({
+const styles = () => ({
   container: {
     width: 900,
     margin: '0 auto',
@@ -50,14 +50,6 @@ const styles = (theme) => ({
   },
   switchField: {
     padding: '20px 0 0',
-  },
-  icon: {
-    cursor: 'pointer',
-    color: theme.palette.primary.main,
-    padding: '0px 8px 0px 8px',
-    '&:hover': {
-      backgroundColor: 'transparent',
-    },
   },
 });
 
@@ -222,6 +214,7 @@ const OtpComponent = ({ closeFunction }) => (
 
 const ProfileOverviewComponent = (props) => {
   const { t, me, classes, about, settings } = props;
+  const theme = useTheme();
   const { external, otp_activated: useOtp } = me;
   const objectOrganization = convertOrganizations(me);
   const [display2FA, setDisplay2FA] = useState(false);
@@ -614,7 +607,12 @@ const ProfileOverviewComponent = (props) => {
               />
             </span>
             <IconButton
-              className={classes.icon}
+              style={{
+                cursor: 'pointer',
+                color: theme.palette.primary.main,
+                padding: `0 ${theme.spacing(1)}`,
+              }}
+              disableRipple
               onClick={toggleTokenVisibility} aria-label={showToken ? t('Hide') : t('Show')}
             >
               {showToken ? <VisibilityOff/> : <Visibility/>}
@@ -660,8 +658,14 @@ const ProfileOverviewComponent = (props) => {
               />
             </span>
             <IconButton
-              className={classes.icon}
-              style={{ position: 'relative', top: '-8px' }}
+              style={{
+                cursor: 'pointer',
+                color: theme.palette.primary.main,
+                padding: `0 ${theme.spacing(1)}`,
+                position: 'relative',
+                top: '-8px',
+              }}
+              disableRipple
               onClick={toggleTokenVisibility}
               aria-label={showToken ? t('Hide') : t('Show')}
             >
