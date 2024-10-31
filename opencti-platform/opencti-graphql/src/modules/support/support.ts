@@ -18,8 +18,7 @@ const SUPPORT_PACKAGE_DEFINITION: ModuleDefinition<StoreEntitySupportPackage, St
   },
   attributes: [
     { name: 'name',
-      label:
-          'Name',
+      label: 'Name',
       type: 'string',
       format: 'short',
       mandatoryType: 'external',
