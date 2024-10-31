@@ -4,8 +4,8 @@ import type { GraphQLFormattedError } from 'graphql/error';
 import { queryAsAdminWithSuccess } from '../../utils/testQueryHelper';
 import { IngestionAuthType, TaxiiVersion } from '../../../src/generated/graphql';
 import { ADMIN_USER, queryAsAdmin, testContext } from '../../utils/testQuery';
-import { now, utcDate } from '../../../src/utils/format';
-import { patchTaxiiIngestion } from '../../../src/modules/ingestion/ingestion-taxii-domain';
+import { now } from '../../../src/utils/format';
+import { findById as findIngestionById, patchTaxiiIngestion } from '../../../src/modules/ingestion/ingestion-taxii-domain';
 
 describe('TAXII ingestion resolver standard behavior', () => {
   let createdTaxiiIngesterId: string;
@@ -54,7 +54,7 @@ describe('TAXII ingestion resolver standard behavior', () => {
     expect(ingesterQueryResult.data?.ingestionTaxiiFieldPatch.authentication_value).toEqual('username:P@ssw0rd!');
   });
 
-  it('should change date reset cursor', async () => {
+  it('should reset cursor when a user change the start date', async () => {
     // shortcut to set a cursor that is defined
     const state = { current_state_cursor: 'aaaaaaaaaaaaaaaaaaa', last_execution_date: now() };
     const result = await patchTaxiiIngestion(testContext, ADMIN_USER, createdTaxiiIngesterId, state);
@@ -72,9 +72,11 @@ describe('TAXII ingestion resolver standard behavior', () => {
       `,
       variables: { id: createdTaxiiIngesterId, input: [{ key: 'added_after_start', value: [now()] }] }
     });
-    console.log('ingesterChangeDateResult:', { result: ingesterChangeDateResult.data?.ingestionTaxiiFieldPatch });
     expect(ingesterChangeDateResult.data?.ingestionTaxiiFieldPatch.id).toBeDefined();
-    expect(ingesterChangeDateResult.data?.ingestionTaxiiFieldPatch.current_state_cursor).not.toBeDefined();
+
+    const ingestionState = await findIngestionById(testContext, ADMIN_USER, createdTaxiiIngesterId);
+    expect(ingestionState.id).toBeDefined();
+    expect(ingestionState.current_state_cursor).not.toBeDefined();
   });
 
   it('should edit a TAXII ingester with : in authentication value be refused', async () => {
