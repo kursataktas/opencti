@@ -21,6 +21,9 @@ export const queryAsAdminWithSuccess = async (request: { query: any, variables: 
     variables: request.variables,
   });
   expect(requestResult, `Something is wrong with this query: ${request.query}`).toBeDefined();
+  if (requestResult.errors) {
+    logApp.info('Unexpected error; requestResult:', { requestResult });
+  }
   expect(requestResult.errors, `This errors should not be there: ${requestResult.errors}`).toBeUndefined();
   return requestResult;
 };
@@ -31,6 +34,9 @@ export const adminQueryWithSuccess = async (request: { query: any, variables: an
     variables: request.variables,
   });
   expect(requestResult, `Something is wrong with this query: ${request.query}`).toBeDefined();
+  if (requestResult.errors) {
+    logApp.info('Unexpected error; requestResult:', { requestResult });
+  }
   expect(requestResult.errors, `This errors should not be there: ${requestResult.errors}`).toBeUndefined();
   return requestResult;
 };
@@ -43,6 +49,9 @@ export const adminQueryWithSuccess = async (request: { query: any, variables: an
 export const queryAsUserWithSuccess = async (client: AxiosInstance, request: { query: any, variables: any }) => {
   const requestResult = await executeInternalQuery(client, print(request.query), request.variables);
   expect(requestResult, `Something is wrong with this query: ${request.query}`).toBeDefined();
+  if (requestResult.errors) {
+    logApp.info('Unexpected error; requestResult:', { requestResult });
+  }
   expect(requestResult.errors, `This errors should not be there: ${JSON.stringify(requestResult.errors)}`).toBeUndefined();
   return requestResult;
 };

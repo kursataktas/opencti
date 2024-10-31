@@ -3,7 +3,9 @@ import gql from 'graphql-tag';
 import type { GraphQLFormattedError } from 'graphql/error';
 import { queryAsAdminWithSuccess } from '../../utils/testQueryHelper';
 import { IngestionAuthType, TaxiiVersion } from '../../../src/generated/graphql';
-import { queryAsAdmin } from '../../utils/testQuery';
+import { ADMIN_USER, queryAsAdmin, testContext } from '../../utils/testQuery';
+import { now, utcDate } from '../../../src/utils/format';
+import { patchTaxiiIngestion } from '../../../src/modules/ingestion/ingestion-taxii-domain';
 
 describe('TAXII ingestion resolver standard behavior', () => {
   let createdTaxiiIngesterId: string;
@@ -20,14 +22,14 @@ describe('TAXII ingestion resolver standard behavior', () => {
     };
     const ingesterQueryResult = await queryAsAdminWithSuccess({
       query: gql`
-                mutation createTaxiiIngester($input: IngestionTaxiiAddInput!) {
-                    ingestionTaxiiAdd(input: $input) {
-                        id
-                        entity_type
-                        ingestion_running
-                    }
-                },
-            `,
+        mutation createTaxiiIngester($input: IngestionTaxiiAddInput!) {
+          ingestionTaxiiAdd(input: $input) {
+              id
+              entity_type
+              ingestion_running
+          }
+        },
+    `,
       variables: INGESTER_TO_CREATE
     });
     expect(ingesterQueryResult.data?.ingestionTaxiiAdd.id).toBeDefined();
@@ -50,6 +52,29 @@ describe('TAXII ingestion resolver standard behavior', () => {
     expect(ingesterQueryResult.data?.ingestionTaxiiFieldPatch.id).toBeDefined();
     expect(ingesterQueryResult.data?.ingestionTaxiiFieldPatch.authentication_type).toEqual(IngestionAuthType.Basic);
     expect(ingesterQueryResult.data?.ingestionTaxiiFieldPatch.authentication_value).toEqual('username:P@ssw0rd!');
+  });
+
+  it('should change date reset cursor', async () => {
+    // shortcut to set a cursor that is defined
+    const state = { current_state_cursor: 'aaaaaaaaaaaaaaaaaaa', last_execution_date: now() };
+    const result = await patchTaxiiIngestion(testContext, ADMIN_USER, createdTaxiiIngesterId, state);
+    expect(result.current_state_cursor).toBe('aaaaaaaaaaaaaaaaaaa');
+
+    const ingesterChangeDateResult = await queryAsAdminWithSuccess({
+      query: gql`
+        mutation ingestionTaxiiFieldPatch($id: ID!, $input: [EditInput!]!) {
+          ingestionTaxiiFieldPatch(id: $id, input: $input) {
+              id
+              current_state_cursor
+              added_after_start
+          }
+        }
+      `,
+      variables: { id: createdTaxiiIngesterId, input: [{ key: 'added_after_start', value: [now()] }] }
+    });
+    console.log('ingesterChangeDateResult:', { result: ingesterChangeDateResult.data?.ingestionTaxiiFieldPatch });
+    expect(ingesterChangeDateResult.data?.ingestionTaxiiFieldPatch.id).toBeDefined();
+    expect(ingesterChangeDateResult.data?.ingestionTaxiiFieldPatch.current_state_cursor).not.toBeDefined();
   });
 
   it('should edit a TAXII ingester with : in authentication value be refused', async () => {
@@ -75,10 +100,10 @@ describe('TAXII ingestion resolver standard behavior', () => {
   it('should delete a TAXII ingester', async () => {
     const ingesterQueryResult = await queryAsAdminWithSuccess({
       query: gql`
-                mutation deleteTaxiiIngester($id: ID!) {
-                    ingestionTaxiiDelete(id: $id)
-                }
-            `,
+        mutation deleteTaxiiIngester($id: ID!) {
+            ingestionTaxiiDelete(id: $id)
+        }
+      `,
       variables: { id: createdTaxiiIngesterId }
     });
     expect(ingesterQueryResult.data?.ingestionTaxiiDelete).toEqual(createdTaxiiIngesterId);
