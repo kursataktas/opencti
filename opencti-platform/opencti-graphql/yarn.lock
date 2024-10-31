@@ -5088,10 +5088,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:0.8.10":
-  version: 0.8.10
-  resolution: "@xmldom/xmldom@npm:0.8.10"
-  checksum: 10/62400bc5e0e75b90650e33a5ceeb8d94829dd11f9b260962b71a784cd014ddccec3e603fe788af9c1e839fa4648d8c521ebd80d8b752878d3a40edabc9ce7ccf
+"@xmldom/xmldom@npm:0.9.5":
+  version: 0.9.5
+  resolution: "@xmldom/xmldom@npm:0.9.5"
+  checksum: 10/d58a2f33a3cbdc73d0f7063d6b8c11a47d321bf861d3287cab1002aaa3a8e35290842e7cf1916e609add594dd66b63f13724369f9ccc3cdc938a317f1c369484
   languageName: node
   linkType: hard
 
