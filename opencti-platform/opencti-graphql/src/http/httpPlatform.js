@@ -194,7 +194,7 @@ const createApp = async (app) => {
   app.get(`${basePath}/storage/get/:file(*)`, async (req, res, next) => {
     try {
       const executeContext = executionContext('storage_get');
-      const auth = await authenticateUserFromRequest(executeContext, req, res);
+      const auth = await authenticateUserFromRequest(executeContext, req);
       if (!auth) {
         res.sendStatus(403);
         return;
@@ -218,7 +218,7 @@ const createApp = async (app) => {
   app.get(`${basePath}/storage/view/:file(*)`, async (req, res, next) => {
     try {
       const executeContext = executionContext('storage_view');
-      const auth = await authenticateUserFromRequest(executeContext, req, res);
+      const auth = await authenticateUserFromRequest(executeContext, req);
       if (!auth) {
         res.sendStatus(403);
         return;
@@ -249,7 +249,7 @@ const createApp = async (app) => {
   app.get(`${basePath}/storage/html/:file(*)`, async (req, res, next) => {
     try {
       const executeContext = executionContext('storage_html');
-      const auth = await authenticateUserFromRequest(executeContext, req, res);
+      const auth = await authenticateUserFromRequest(executeContext, req);
       if (!auth) {
         res.sendStatus(403);
         return;
@@ -280,7 +280,7 @@ const createApp = async (app) => {
   app.get(`${basePath}/storage/encrypted/:file(*)`, async (req, res, next) => {
     try {
       const executeContext = executionContext('storage_encrypted');
-      const auth = await authenticateUserFromRequest(executeContext, req, res);
+      const auth = await authenticateUserFromRequest(executeContext, req);
       if (!auth) {
         res.sendStatus(403);
         return;

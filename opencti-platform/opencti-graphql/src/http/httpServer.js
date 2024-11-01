@@ -123,7 +123,7 @@ const createHttpServer = async () => {
         executeContext.previousStandard = req.headers['previous-standard']; // Previous standard id
         executeContext.synchronizedUpsert = req.headers['synchronized-upsert'] === 'true'; // If full sync needs to be done
         try {
-          const user = await authenticateUserFromRequest(executeContext, req, res);
+          const user = await authenticateUserFromRequest(executeContext, req);
           if (user) {
             executeContext.user = userWithOrigin(req, user);
           }

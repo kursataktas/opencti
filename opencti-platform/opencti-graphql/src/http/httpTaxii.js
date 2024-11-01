@@ -30,7 +30,7 @@ const userHaveAccess = (user) => {
 };
 const extractUserFromRequest = async (context, req, res) => {
   // noinspection UnnecessaryLocalVariableJS
-  const user = await authenticateUserFromRequest(context, req, res);
+  const user = await authenticateUserFromRequest(context, req);
   if (!user) {
     res.setHeader('WWW-Authenticate', 'Basic, Bearer');
     throw AuthRequired();
