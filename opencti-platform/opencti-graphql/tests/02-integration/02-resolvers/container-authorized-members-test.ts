@@ -530,7 +530,7 @@ describe('Case Incident Response and organization sharing standard behavior with
     const queryResult = await adminQuery({ query: SETTINGS_READ_QUERY, variables: {} });
     settingsInternalId = queryResult.data?.settings?.id;
 
-    // Set plateform organization
+    // Set platform organization
     const platformOrganization = await adminQueryWithSuccess({
       query: PLATFORM_ORGANIZATION_QUERY,
       variables: {

@@ -11,7 +11,7 @@ import { isUserHasCapability, SETTINGS_SET_ACCESSES, SYSTEM_USER } from '../util
 import { storeLoadById } from '../database/middleware-loader';
 import { INTERNAL_SECURITY_PROVIDER, PROVIDERS } from '../config/providers';
 import { publishUserAction } from '../listener/UserActionListener';
-import { getEntityFromCache } from '../database/cache';
+import { getEntityFromCache, resetCacheForEntity } from '../database/cache';
 import { now } from '../utils/format';
 import { generateInternalId } from '../schema/identifier';
 import { UnsupportedError } from '../config/errors';
@@ -133,6 +133,8 @@ export const settingsEditField = async (context, user, settingsId, input) => {
     message: `updates \`${input.map((i) => i.key).join(', ')}\` for \`platform settings\``,
     context_data: { id: settingsId, entity_type: ENTITY_TYPE_SETTINGS, input }
   });
+  // TRY EXPLICIT CACHE RESET FOR TESTING (TO BE CHANGED)
+  resetCacheForEntity(ENTITY_TYPE_SETTINGS);
   const updatedSettings = await getSettings(context);
   return notify(BUS_TOPICS.Settings.EDIT_TOPIC, updatedSettings, user);
 };
