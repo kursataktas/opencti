@@ -511,7 +511,7 @@ describe('Case Incident Response and organization sharing standard behavior with
   let caseIrId: string;
   let userEditorId: string;
   let settingsInternalId: string;
-  it('should plateform organization sharing and EE activated', async () => {
+  it('should platform organization sharing and EE activated', async () => {
     // Get organization id
     platformOrganizationId = await getOrganizationIdByName(PLATFORM_ORGANIZATION.name);
 
@@ -633,7 +633,7 @@ describe('Case Incident Response and organization sharing standard behavior with
     expect(caseIRQueryResult?.data?.caseIncident).not.toBeUndefined();
     expect(caseIRQueryResult?.data?.caseIncident.id).toEqual(caseIrId);
   });
-  it('should plateform organization sharing and EE deactivated', async () => {
+  it('should platform organization sharing and EE deactivated', async () => {
     // Remove plateform organization
     const platformOrganization = await adminQueryWithSuccess({
       query: PLATFORM_ORGANIZATION_QUERY,
