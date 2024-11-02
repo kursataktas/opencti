@@ -84,7 +84,6 @@ export const SYSTEM_USER: AuthUser = {
   individual_id: undefined,
   name: 'SYSTEM',
   user_email: 'SYSTEM',
-  inside_platform_organization: true,
   origin: { user_id: OPENCTI_SYSTEM_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -118,7 +117,6 @@ export const RETENTION_MANAGER_USER: AuthUser = {
   individual_id: undefined,
   name: 'RETENTION MANAGER',
   user_email: 'RETENTION MANAGER',
-  inside_platform_organization: true,
   origin: { user_id: RETENTION_MANAGER_USER_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -152,7 +150,6 @@ export const RULE_MANAGER_USER: AuthUser = {
   individual_id: undefined,
   name: 'RULE MANAGER',
   user_email: 'RULE MANAGER',
-  inside_platform_organization: true,
   origin: { user_id: RULE_MANAGER_USER_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -186,7 +183,6 @@ export const AUTOMATION_MANAGER_USER: AuthUser = {
   individual_id: undefined,
   name: 'AUTOMATION MANAGER',
   user_email: 'AUTOMATION MANAGER',
-  inside_platform_organization: true,
   origin: { user_id: AUTOMATION_MANAGER_USER_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -220,7 +216,6 @@ export const DECAY_MANAGER_USER: AuthUser = {
   individual_id: undefined,
   name: 'DECAY MANAGER',
   user_email: 'DECAY MANAGER',
-  inside_platform_organization: true,
   origin: { user_id: DECAY_MANAGER_USER_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -254,7 +249,6 @@ export const GARBAGE_COLLECTION_MANAGER_USER: AuthUser = {
   individual_id: undefined,
   name: 'GARBAGE_COLLECTION MANAGER',
   user_email: 'GARBAGE COLLECTION MANAGER',
-  inside_platform_organization: true,
   origin: { user_id: GARBAGE_COLLECTION_MANAGER_USER_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -289,7 +283,6 @@ export const REDACTED_USER: AuthUser = {
   individual_id: undefined,
   name: '*** Redacted ***',
   user_email: '*** Redacted ***',
-  inside_platform_organization: false,
   origin: { user_id: REDACTED_USER_UUID, socket: 'internal' },
   roles: [],
   groups: [],
@@ -316,7 +309,6 @@ export const TELEMETRY_MANAGER_USER: AuthUser = {
   individual_id: undefined,
   name: 'TELEMETRY MANAGER',
   user_email: 'TELEMETRY MANAGER',
-  inside_platform_organization: true,
   origin: { user_id: TELEMETRY_MANAGER_USER_UUID, socket: 'internal' },
   roles: [ADMINISTRATOR_ROLE],
   groups: [],
@@ -398,6 +390,11 @@ export const isOnlyOrgaAdmin = (user: AuthUser) => {
   return !isUserHasCapability(user, SETTINGS_SET_ACCESSES) && isUserHasCapability(user, VIRTUAL_ORGANIZATION_ADMIN);
 };
 
+export const isUserInsidePlatformOrganization = (settings: BasicStoreSettings, user: AuthUser) => {
+  const userOrganizations = user.allowed_organizations.map((m) => m.internal_id);
+  return settings.platform_organization ? userOrganizations.includes(settings.platform_organization) : true;
+};
+
 export const userFilterStoreElements = async (context: AuthContext, user: AuthUser, elements: Array<BasicStoreCommon>) => {
   const userFilterStoreElementsFn = async () => {
     // If user have bypass, grant access to all
@@ -428,7 +425,7 @@ export const userFilterStoreElements = async (context: AuthContext, user: AuthUs
       // If platform organization is set
       if (settings.platform_organization) {
         // If user part of platform organization, is granted by default
-        if (user.inside_platform_organization) {
+        if (isUserInsidePlatformOrganization(settings, user)) {
           return true;
         }
         // Grant access to the user individual
@@ -483,7 +480,7 @@ export const isUserCanAccessStixElement = async (context: AuthContext, user: Aut
   // If platform organization is set
   if (settings.platform_organization) {
     // If user part of platform organization, is granted by default
-    if (user.inside_platform_organization) {
+    if (isUserInsidePlatformOrganization(settings, user)) {
       return true;
     }
     // If not, user is by design inside an organization

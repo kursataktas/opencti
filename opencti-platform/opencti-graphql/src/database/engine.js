@@ -98,6 +98,7 @@ import {
   executionContext,
   INTERNAL_USERS,
   isBypassUser,
+  isUserInsidePlatformOrganization,
   MEMBER_ACCESS_ALL,
   SYSTEM_USER,
   userFilterStoreElements
@@ -465,7 +466,7 @@ export const buildDataRestrictions = async (context, user, opts = {}) => {
     // If user have organization management role, he can bypass this restriction.
     // If platform is for specific organization, only user from this organization can access empty defined
     const settings = await getEntityFromCache(context, user, ENTITY_TYPE_SETTINGS);
-    // We want to exlucde a set of entities from organization restrictions while forcing restrictions for an other set of entities
+    // We want to exclude a set of entities from organization restrictions while forcing restrictions for another set of entities
     const excludedEntityMatches = {
       bool: {
         must: [
@@ -485,7 +486,7 @@ export const buildDataRestrictions = async (context, user, opts = {}) => {
       }
     };
     if (settings.platform_organization) {
-      if (user.inside_platform_organization) {
+      if (isUserInsidePlatformOrganization(settings, user)) {
         // Data are visible independently of the organizations
         // Nothing to restrict.
       } else {
