@@ -8,7 +8,7 @@ export interface BasicStoreEntityExclusionList extends BasicStoreEntity {
   name: string
   description: string
   list_entity_types: string[]
-  exclusion_list_url: string
+  file_id: string
   enabled: boolean
 }
 
@@ -16,7 +16,7 @@ export interface StoreEntityExclusionList extends StoreEntity {
   name: string
   description: string
   list_entity_types: string[]
-  exclusion_list_url: string
+  file_id: string
   enabled: boolean
 }
 
@@ -24,7 +24,7 @@ export interface StixExclusionList extends StixObject {
   name: string
   description: string
   list_entity_types: string[]
-  exclusion_list_url: string
+  file_id: string
   enabled: boolean
   extensions: {
     [STIX_EXT_OCTI] : StixOpenctiExtensionSDO

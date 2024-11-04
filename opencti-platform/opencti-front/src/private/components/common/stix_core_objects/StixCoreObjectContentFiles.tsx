@@ -161,7 +161,8 @@ const StixCoreObjectContentFiles: FunctionComponent<StixCoreObjectContentFilesPr
     const blob = new Blob([t_i18n('Write something awesome...')], { type });
     const file = new File([blob], fileName, { type });
     const fileMarkings = values.fileMarkings.map(({ value }) => value);
-
+    console.log('blob : ', blob);
+    console.log('file : ', file);
     commitUploadFile({
       variables: { file, id: stixCoreObjectId, fileMarkings },
       onCompleted: (result) => {
@@ -201,6 +202,7 @@ const StixCoreObjectContentFiles: FunctionComponent<StixCoreObjectContentFilesPr
       hardcodedResolvedAttributesWidgets,
       maxContentMarkings,
     );
+    console.log('templae : ');
     const blob = new Blob([templateContent], { type });
     const file = new File([blob], fileName, { type });
 

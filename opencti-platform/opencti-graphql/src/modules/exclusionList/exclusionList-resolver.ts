@@ -7,10 +7,10 @@ const exclusionListResolver: Resolvers = {
     exclusionLists: (_, args, context) => findAll(context, context.user, args),
   },
   Mutation: {
-    exclusionListAddWithValues: (_, { input }, context) => {
+    exclusionListValuesAdd: (_, { input }, context) => {
       return addExclusionListWithValues(context, context.user, input);
     },
-    exclusionListAddFWithFile: (_, { input }, context) => {
+    exclusionListFileAdd: (_, { input }, context) => {
       return addExclusionListWithFile(context, context.user, input);
     },
     exclusionListDelete: (_, { id }, context) => {

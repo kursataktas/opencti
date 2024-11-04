@@ -61,8 +61,8 @@ const EXCLUSION_LIST_DEFINITION: ModuleDefinition<StoreEntityExclusionList, Stix
       isFilterable: false
     },
     {
-      name: 'exclusion_list_url',
-      label: 'Exclusion list url',
+      name: 'file_id',
+      label: 'File id',
       type: 'string',
       format: 'short',
       mandatoryType: 'internal',
