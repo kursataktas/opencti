@@ -20,8 +20,6 @@ import { ingestionCsvEditionFragment } from '@components/data/ingestionCsv/Inges
 import { IngestionCsvEditionFragment_ingestionCsv$key } from '@components/data/ingestionCsv/__generated__/IngestionCsvEditionFragment_ingestionCsv.graphql';
 import { IngestionCsvEditionContainerQuery } from '@components/data/ingestionCsv/__generated__/IngestionCsvEditionContainerQuery.graphql';
 import { ExternalReferencesValues } from '@components/common/form/ExternalReferencesField';
-import IconButton from '@mui/material/IconButton';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Drawer, { DrawerVariant } from '../../common/drawer/Drawer';
 import { useFormatter } from '../../../../components/i18n';
 import TextField from '../../../../components/TextField';
@@ -39,6 +37,7 @@ import { USER_CHOICE_MARKING_CONFIG } from '../../../../utils/csvMapperUtils';
 import { convertMapper, convertUser } from '../../../../utils/edition';
 import { BASIC_AUTH, CERT_AUTH, extractCA, extractCert, extractKey, extractPassword, extractUsername } from '../../../../utils/ingestionAuthentificationUtils';
 import useAuth from '../../../../utils/hooks/useAuth';
+import ToggleVisibilityField from '../../../../components/ToggleVisibilityField';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -110,7 +109,6 @@ const resolveHasUserChoiceCsvMapper = (option: Option & {
 const IngestionCsvCreation: FunctionComponent<IngestionCsvCreationProps> = ({ paginationOptions, isDuplicated, handleClose, ingestionCsv }) => {
   const { t_i18n } = useFormatter();
   const classes = useStyles();
-  const [showToken, setShowToken] = useState(false);
   const [open, setOpen] = useState(false);
   const ingestionCsvData = useFragment(ingestionCsvEditionFragment, ingestionCsv);
   const [isCreateDisabled, setIsCreateDisabled] = useState(true);
@@ -244,10 +242,6 @@ const IngestionCsvCreation: FunctionComponent<IngestionCsvCreationProps> = ({ pa
     markings: [],
   };
 
-  const toggleTokenVisibility = () => {
-    setShowToken(!showToken);
-  };
-
   return (
     <Formik<IngestionCsvAddInput>
       initialValues={initialValues}
@@ -361,61 +355,17 @@ const IngestionCsvCreation: FunctionComponent<IngestionCsvCreationProps> = ({ pa
               fullWidth={true}
               style={fieldSpacingContainerStyle}
             />
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Field
-                component={TextField}
-                variant="standard"
-                name="password"
-                type={showToken ? 'text' : 'password'}
-                label={t_i18n('Password')}
-                fullWidth={true}
-                style={fieldSpacingContainerStyle}
-              />
-              <IconButton
-                onClick={toggleTokenVisibility}
-                aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
-                style={{
-                  position: 'absolute',
-                  right: 1,
-                  top: '60%',
-                  margin: 0,
-                  padding: 0,
-                  zIndex: 1,
-                }}
-                disableRipple
-              >
-                {showToken ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </div>
+            <ToggleVisibilityField
+              name="password"
+              label={t_i18n('Password')}
+            />
           </>
           )}
           {values.authentication_type === 'bearer' && (
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Field
-              component={TextField}
-              variant="standard"
-              name="authentication_value"
-              type={showToken ? 'text' : 'password'}
-              label={t_i18n('Token')}
-              fullWidth={true}
-              style={fieldSpacingContainerStyle}
-            />
-            <IconButton
-              onClick={toggleTokenVisibility}
-              aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
-              style={{
-                position: 'absolute',
-                right: 1,
-                top: '60%',
-                margin: 0,
-                padding: 0,
-                zIndex: 1,
-              }}
-              disableRipple
-            >
-              {showToken ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </div>
+          <ToggleVisibilityField
+            name="authentication_value"
+            label={t_i18n('Token')}
+          />
           )}
           {values.authentication_type === 'certificate' && (
           <>
@@ -427,32 +377,10 @@ const IngestionCsvCreation: FunctionComponent<IngestionCsvCreationProps> = ({ pa
               fullWidth={true}
               style={fieldSpacingContainerStyle}
             />
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Field
-                component={TextField}
-                variant="standard"
-                name="key"
-                type={showToken ? 'text' : 'password'}
-                label={t_i18n('Key (base64)')}
-                fullWidth={true}
-                style={fieldSpacingContainerStyle}
-              />
-              <IconButton
-                onClick={toggleTokenVisibility}
-                aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
-                style={{
-                  position: 'absolute',
-                  right: 1,
-                  top: '60%',
-                  margin: 0,
-                  padding: 0,
-                  zIndex: 1,
-                }}
-                disableRipple
-              >
-                {showToken ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </div>
+            <ToggleVisibilityField
+              name="key"
+              label={t_i18n('Key (base64)')}
+            />
             <Field
               component={TextField}
               variant="standard"

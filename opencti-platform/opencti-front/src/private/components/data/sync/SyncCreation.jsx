@@ -13,8 +13,6 @@ import Tooltip from '@mui/material/Tooltip';
 import { InformationOutline } from 'mdi-material-ui';
 import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Drawer, { DrawerVariant } from '../../common/drawer/Drawer';
 import { useFormatter } from '../../../../components/i18n';
 import { commitMutation, fetchQuery, handleErrorInForm, MESSAGING$ } from '../../../../relay/environment';
@@ -30,6 +28,7 @@ import EnrichedTooltip from '../../../../components/EnrichedTooltip';
 import { fieldSpacingContainerStyle } from '../../../../utils/field';
 import { Accordion, AccordionSummary } from '../../../../components/Accordion';
 import { deserializeFilterGroupForFrontend } from '../../../../utils/filters/filtersUtils';
+import ToggleVisibilityField from '../../../../components/ToggleVisibilityField';
 
 // Deprecated - https://mui.com/system/styles/basics/
 // Do not use it for new code.
@@ -102,7 +101,6 @@ const SyncCreation = ({ paginationOptions }) => {
   const classes = useStyles();
   const [verified, setVerified] = useState(false);
   const [streams, setStreams] = useState([]);
-  const [showToken, setShowToken] = useState(false);
   const handleVerify = (values, setErrors) => {
     const input = { ...values, user_id: values.user_id?.value };
     commitMutation({
@@ -182,10 +180,6 @@ const SyncCreation = ({ paginationOptions }) => {
       });
   };
 
-  const toggleTokenVisibility = () => {
-    setShowToken(!showToken);
-  };
-
   return (
     <Drawer
       title={t_i18n('Create a synchronizer')}
@@ -254,33 +248,11 @@ const SyncCreation = ({ paginationOptions }) => {
                     disabled={streams.length > 0}
                     style={fieldSpacingContainerStyle}
                   />
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <Field
-                      component={TextField}
-                      variant="standard"
-                      name="token"
-                      type={showToken ? 'text' : 'password'}
-                      label={t_i18n('Remote OpenCTI token')}
-                      fullWidth={true}
-                      disabled={streams.length > 0}
-                      style={fieldSpacingContainerStyle}
-                    />
-                    <IconButton
-                      onClick={toggleTokenVisibility}
-                      aria-label={showToken ? t_i18n('Hide') : t_i18n('Show')}
-                      style={{
-                        position: 'absolute',
-                        right: 1,
-                        top: '60%',
-                        margin: 0,
-                        padding: 0,
-                        zIndex: 1,
-                      }}
-                      disableRipple
-                    >
-                      {showToken ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </div>
+                  <ToggleVisibilityField
+                    name="Token"
+                    label={t_i18n('Remote OpenCTI token')}
+                    disabled={streams.length > 0}
+                  />
                   {streams.length > 0 && (
                     <Field
                       component={SelectField}

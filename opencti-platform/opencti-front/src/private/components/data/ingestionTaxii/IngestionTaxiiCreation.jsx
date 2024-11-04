@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import * as PropTypes from 'prop-types';
 import { Field, Form, Formik } from 'formik';
 import withStyles from '@mui/styles/withStyles';
@@ -7,8 +7,6 @@ import * as Yup from 'yup';
 import { graphql } from 'react-relay';
 import * as R from 'ramda';
 import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { BASIC_AUTH, BEARER_AUTH, CERT_AUTH, getAuthenticationValue } from '../../../../utils/ingestionAuthentificationUtils';
 import Drawer, { DrawerVariant } from '../../common/drawer/Drawer';
 import inject18n from '../../../../components/i18n';
@@ -20,6 +18,7 @@ import { insertNode } from '../../../../utils/store';
 import SelectField from '../../../../components/fields/SelectField';
 import DateTimePickerField from '../../../../components/DateTimePickerField';
 import SwitchField from '../../../../components/fields/SwitchField';
+import ToggleVisibilityField from '../../../../components/ToggleVisibilityField';
 
 const styles = (theme) => ({
   buttons: {
@@ -61,7 +60,6 @@ const ingestionTaxiiCreationValidation = (t) => Yup.object().shape({
 
 const IngestionTaxiiCreation = (props) => {
   const { t, classes } = props;
-  const [showToken, setShowToken] = useState(false);
   const onSubmit = (values, { setSubmitting, resetForm }) => {
     const authentifcationValueResolved = getAuthenticationValue(values);
 
@@ -96,10 +94,6 @@ const IngestionTaxiiCreation = (props) => {
         resetForm();
       },
     });
-  };
-
-  const toggleTokenVisibility = () => {
-    setShowToken(!showToken);
   };
 
   return (
@@ -206,61 +200,17 @@ const IngestionTaxiiCreation = (props) => {
                   fullWidth={true}
                   style={fieldSpacingContainerStyle}
                 />
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Field
-                    component={TextField}
-                    variant="standard"
-                    name="password"
-                    type={showToken ? 'text' : 'password'}
-                    label={t('Password')}
-                    fullWidth={true}
-                    style={fieldSpacingContainerStyle}
-                  />
-                  <IconButton
-                    onClick={toggleTokenVisibility}
-                    aria-label={showToken ? t('Hide') : t('Show')}
-                    style={{
-                      position: 'absolute',
-                      right: 1,
-                      top: '60%',
-                      margin: 0,
-                      padding: 0,
-                      zIndex: 1,
-                    }}
-                    disableRipple
-                  >
-                    {showToken ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </div>
+                <ToggleVisibilityField
+                  name="password"
+                  label={t('Password')}
+                />
               </>
               )}
               {values.authentication_type === BEARER_AUTH && (
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <Field
-                  component={TextField}
-                  variant="standard"
-                  name="authentication_value"
-                  type={showToken ? 'text' : 'password'}
-                  label={t('Token')}
-                  fullWidth={true}
-                  style={fieldSpacingContainerStyle}
-                />
-                <IconButton
-                  onClick={toggleTokenVisibility}
-                  aria-label={showToken ? t('Hide') : t('Show')}
-                  style={{
-                    position: 'absolute',
-                    right: 1,
-                    top: '60%',
-                    margin: 0,
-                    padding: 0,
-                    zIndex: 1,
-                  }}
-                  disableRipple
-                >
-                  {showToken ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </div>
+              <ToggleVisibilityField
+                name="authentication_value"
+                label={t('Token')}
+              />
               )}
               {values.authentication_type === CERT_AUTH && (
               <>
@@ -272,32 +222,10 @@ const IngestionTaxiiCreation = (props) => {
                   fullWidth={true}
                   style={fieldSpacingContainerStyle}
                 />
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Field
-                    component={TextField}
-                    variant="standard"
-                    name="key"
-                    type={showToken ? 'text' : 'password'}
-                    label={t('Key (base64)')}
-                    fullWidth={true}
-                    style={fieldSpacingContainerStyle}
-                  />
-                  <IconButton
-                    onClick={toggleTokenVisibility}
-                    aria-label={showToken ? t('Hide') : t('Show')}
-                    style={{
-                      position: 'absolute',
-                      right: 1,
-                      top: '60%',
-                      margin: 0,
-                      padding: 0,
-                      zIndex: 1,
-                    }}
-                    disableRipple
-                  >
-                    {showToken ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </div>
+                <ToggleVisibilityField
+                  name="key"
+                  label={t('Key (base64)')}
+                />
                 <Field
                   component={TextField}
                   variant="standard"
