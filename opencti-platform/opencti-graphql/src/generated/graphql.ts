@@ -7380,28 +7380,15 @@ export enum EventsOrdering {
 export type ExclusionList = BasicObject & InternalObject & {
   __typename?: 'ExclusionList';
   created_at: Scalars['DateTime']['output'];
-  description: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
   enabled: Scalars['Boolean']['output'];
   entity_type: Scalars['String']['output'];
+  file_id: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   list_entity_types: Array<ExclusionListEntityTypes>;
   name: Scalars['String']['output'];
   parent_types: Array<Maybe<Scalars['String']['output']>>;
   standard_id: Scalars['String']['output'];
-};
-
-export type ExclusionListAddWithFileInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  file: Scalars['Upload']['input'];
-  list_entity_types: Array<ExclusionListEntityTypes>;
-  name: Scalars['String']['input'];
-};
-
-export type ExclusionListAddWithValuesInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  list_entity_types: Array<ExclusionListEntityTypes>;
-  name: Scalars['String']['input'];
-  values?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type ExclusionListConnection = {
@@ -7422,10 +7409,24 @@ export enum ExclusionListEntityTypes {
   Url = 'URL'
 }
 
+export type ExclusionListFileAddInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  file: Scalars['Upload']['input'];
+  list_entity_types: Array<ExclusionListEntityTypes>;
+  name: Scalars['String']['input'];
+};
+
 export enum ExclusionListOrdering {
   CreatedAt = 'created_at',
   Name = 'name'
 }
+
+export type ExclusionListValuesAddInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  list_entity_types: Array<ExclusionListEntityTypes>;
+  name: Scalars['String']['input'];
+  values: Scalars['String']['input'];
+};
 
 export type ExportAskInput = {
   contentMaxMarkings?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -13357,9 +13358,9 @@ export type Mutation = {
   eventFieldPatch?: Maybe<Event>;
   eventRelationAdd?: Maybe<StixRefRelationship>;
   eventRelationDelete?: Maybe<Event>;
-  exclusionListAddFWithFile?: Maybe<ExclusionList>;
-  exclusionListAddWithValues?: Maybe<ExclusionList>;
   exclusionListDelete?: Maybe<Scalars['ID']['output']>;
+  exclusionListFileAdd?: Maybe<ExclusionList>;
+  exclusionListValuesAdd?: Maybe<ExclusionList>;
   externalReferenceAdd?: Maybe<ExternalReference>;
   externalReferenceEdit?: Maybe<ExternalReferenceEditMutations>;
   feedAdd?: Maybe<Feed>;
@@ -14161,18 +14162,18 @@ export type MutationEventRelationDeleteArgs = {
 };
 
 
-export type MutationExclusionListAddFWithFileArgs = {
-  input?: InputMaybe<ExclusionListAddWithFileInput>;
-};
-
-
-export type MutationExclusionListAddWithValuesArgs = {
-  input?: InputMaybe<ExclusionListAddWithValuesInput>;
-};
-
-
 export type MutationExclusionListDeleteArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationExclusionListFileAddArgs = {
+  input?: InputMaybe<ExclusionListFileAddInput>;
+};
+
+
+export type MutationExclusionListValuesAddArgs = {
+  input?: InputMaybe<ExclusionListValuesAddInput>;
 };
 
 
@@ -30559,12 +30560,12 @@ export type ResolversTypes = ResolversObject<{
   EventEdge: ResolverTypeWrapper<Omit<EventEdge, 'node'> & { node: ResolversTypes['Event'] }>;
   EventsOrdering: EventsOrdering;
   ExclusionList: ResolverTypeWrapper<BasicStoreEntityExclusionList>;
-  ExclusionListAddWithFileInput: ExclusionListAddWithFileInput;
-  ExclusionListAddWithValuesInput: ExclusionListAddWithValuesInput;
   ExclusionListConnection: ResolverTypeWrapper<Omit<ExclusionListConnection, 'edges'> & { edges?: Maybe<Array<ResolversTypes['ExclusionListEdge']>> }>;
   ExclusionListEdge: ResolverTypeWrapper<Omit<ExclusionListEdge, 'node'> & { node: ResolversTypes['ExclusionList'] }>;
   ExclusionListEntityTypes: ExclusionListEntityTypes;
+  ExclusionListFileAddInput: ExclusionListFileAddInput;
   ExclusionListOrdering: ExclusionListOrdering;
+  ExclusionListValuesAddInput: ExclusionListValuesAddInput;
   ExportAskInput: ExportAskInput;
   ExportContext: ExportContext;
   ExternalReference: ResolverTypeWrapper<Omit<ExternalReference, 'connectors' | 'exportFiles' | 'importFiles' | 'jobs' | 'pendingFiles' | 'references' | 'x_opencti_inferences'> & { connectors?: Maybe<Array<Maybe<ResolversTypes['Connector']>>>, exportFiles?: Maybe<ResolversTypes['FileConnection']>, importFiles: ResolversTypes['FileConnection'], jobs?: Maybe<Array<Maybe<ResolversTypes['Work']>>>, pendingFiles: ResolversTypes['FileConnection'], references?: Maybe<ResolversTypes['StixObjectOrStixRelationshipConnection']>, x_opencti_inferences?: Maybe<Array<Maybe<ResolversTypes['Inference']>>> }>;
@@ -31369,10 +31370,10 @@ export type ResolversParentTypes = ResolversObject<{
   EventConnection: Omit<EventConnection, 'edges'> & { edges?: Maybe<Array<Maybe<ResolversParentTypes['EventEdge']>>> };
   EventEdge: Omit<EventEdge, 'node'> & { node: ResolversParentTypes['Event'] };
   ExclusionList: BasicStoreEntityExclusionList;
-  ExclusionListAddWithFileInput: ExclusionListAddWithFileInput;
-  ExclusionListAddWithValuesInput: ExclusionListAddWithValuesInput;
   ExclusionListConnection: Omit<ExclusionListConnection, 'edges'> & { edges?: Maybe<Array<ResolversParentTypes['ExclusionListEdge']>> };
   ExclusionListEdge: Omit<ExclusionListEdge, 'node'> & { node: ResolversParentTypes['ExclusionList'] };
+  ExclusionListFileAddInput: ExclusionListFileAddInput;
+  ExclusionListValuesAddInput: ExclusionListValuesAddInput;
   ExportAskInput: ExportAskInput;
   ExportContext: ExportContext;
   ExternalReference: Omit<ExternalReference, 'connectors' | 'exportFiles' | 'importFiles' | 'jobs' | 'pendingFiles' | 'references' | 'x_opencti_inferences'> & { connectors?: Maybe<Array<Maybe<ResolversParentTypes['Connector']>>>, exportFiles?: Maybe<ResolversParentTypes['FileConnection']>, importFiles: ResolversParentTypes['FileConnection'], jobs?: Maybe<Array<Maybe<ResolversParentTypes['Work']>>>, pendingFiles: ResolversParentTypes['FileConnection'], references?: Maybe<ResolversParentTypes['StixObjectOrStixRelationshipConnection']>, x_opencti_inferences?: Maybe<Array<Maybe<ResolversParentTypes['Inference']>>> };
@@ -34282,9 +34283,10 @@ export type EventEdgeResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type ExclusionListResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExclusionList'] = ResolversParentTypes['ExclusionList']> = ResolversObject<{
   created_at?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   entity_type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  file_id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   list_entity_types?: Resolver<Array<ResolversTypes['ExclusionListEntityTypes']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -36387,9 +36389,9 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   eventFieldPatch?: Resolver<Maybe<ResolversTypes['Event']>, ParentType, ContextType, RequireFields<MutationEventFieldPatchArgs, 'id' | 'input'>>;
   eventRelationAdd?: Resolver<Maybe<ResolversTypes['StixRefRelationship']>, ParentType, ContextType, RequireFields<MutationEventRelationAddArgs, 'id' | 'input'>>;
   eventRelationDelete?: Resolver<Maybe<ResolversTypes['Event']>, ParentType, ContextType, RequireFields<MutationEventRelationDeleteArgs, 'id' | 'relationship_type' | 'toId'>>;
-  exclusionListAddFWithFile?: Resolver<Maybe<ResolversTypes['ExclusionList']>, ParentType, ContextType, Partial<MutationExclusionListAddFWithFileArgs>>;
-  exclusionListAddWithValues?: Resolver<Maybe<ResolversTypes['ExclusionList']>, ParentType, ContextType, Partial<MutationExclusionListAddWithValuesArgs>>;
   exclusionListDelete?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType, RequireFields<MutationExclusionListDeleteArgs, 'id'>>;
+  exclusionListFileAdd?: Resolver<Maybe<ResolversTypes['ExclusionList']>, ParentType, ContextType, Partial<MutationExclusionListFileAddArgs>>;
+  exclusionListValuesAdd?: Resolver<Maybe<ResolversTypes['ExclusionList']>, ParentType, ContextType, Partial<MutationExclusionListValuesAddArgs>>;
   externalReferenceAdd?: Resolver<Maybe<ResolversTypes['ExternalReference']>, ParentType, ContextType, RequireFields<MutationExternalReferenceAddArgs, 'input'>>;
   externalReferenceEdit?: Resolver<Maybe<ResolversTypes['ExternalReferenceEditMutations']>, ParentType, ContextType, RequireFields<MutationExternalReferenceEditArgs, 'id'>>;
   feedAdd?: Resolver<Maybe<ResolversTypes['Feed']>, ParentType, ContextType, RequireFields<MutationFeedAddArgs, 'input'>>;

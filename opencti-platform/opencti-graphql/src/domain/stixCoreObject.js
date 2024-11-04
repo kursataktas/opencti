@@ -613,6 +613,7 @@ export const stixCoreObjectImportPush = async (context, user, id, file, args = {
   if (getDraftContext(context, user)) throw new Error('Cannot import in draft');
   let lock;
   const { noTriggerImport, version: fileVersion, fileMarkings: file_markings, importContextEntities, fromTemplate = false } = args;
+  console.log('args : ', args);
   const previous = await storeLoadByIdWithRefs(context, user, id);
   if (!previous) {
     throw UnsupportedError('Cant upload a file an none existing element', { id });

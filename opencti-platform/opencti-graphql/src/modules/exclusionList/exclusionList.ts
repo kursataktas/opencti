@@ -32,7 +32,7 @@ const EXCLUSION_LIST_DEFINITION: ModuleDefinition<StoreEntityExclusionList, Stix
       name: 'description',
       label: 'Description',
       type: 'string',
-      format: 'short',
+      format: 'text',
       mandatoryType: 'no',
       editDefault: false,
       multiple: false,

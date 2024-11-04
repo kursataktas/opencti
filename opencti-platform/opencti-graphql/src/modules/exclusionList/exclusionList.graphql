@@ -32,14 +32,14 @@ enum ExclusionListEntityTypes {
   URL
 }
 
-input ExclusionListAddWithValuesInput {
+input ExclusionListValuesAddInput {
   name: String!
   description: String
   list_entity_types: [ExclusionListEntityTypes!]!
-  values: [String!]
+  values: String!
 }
 
-input ExclusionListAddWithFileInput {
+input ExclusionListFileAddInput {
   name: String!
   description: String
   list_entity_types: [ExclusionListEntityTypes!]!
@@ -59,7 +59,7 @@ type Query {
 }
 
 type Mutation {
-  exclusionListValuesAdd(input: ExclusionListAddWithValuesInput): ExclusionList @auth(for: [SETTINGS_SETCUSTOMIZATION])
-  exclusionListFileAdd(input: ExclusionListAddWithFileInput): ExclusionList @auth(for: [SETTINGS_SETCUSTOMIZATION])
+  exclusionListValuesAdd(input: ExclusionListValuesAddInput): ExclusionList @auth(for: [SETTINGS_SETCUSTOMIZATION])
+  exclusionListFileAdd(input: ExclusionListFileAddInput): ExclusionList @auth(for: [SETTINGS_SETCUSTOMIZATION])
   exclusionListDelete(id: ID!): ID @auth(for: [SETTINGS_SETCUSTOMIZATION])
 }

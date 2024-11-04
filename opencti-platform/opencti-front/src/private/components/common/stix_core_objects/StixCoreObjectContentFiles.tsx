@@ -202,10 +202,11 @@ const StixCoreObjectContentFiles: FunctionComponent<StixCoreObjectContentFilesPr
       hardcodedResolvedAttributesWidgets,
       maxContentMarkings,
     );
-    console.log('templae : ');
+    console.log('template : ', templateContent);
     const blob = new Blob([templateContent], { type });
     const file = new File([blob], fileName, { type });
-
+    console.log('AZEAZEAZEZA');
+    console.log('file : ', file);
     commitUploadFile({
       variables: { file, id: stixCoreObjectId, fileMarkings, fromTemplate: true },
       onCompleted: (result) => {
